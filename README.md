@@ -1,6 +1,6 @@
 # agent-js-nightwatch
 
-Agent for integration Nightwatch with ReportPortal.     
+Agent for integration Nightwatch with ReportPortal.
 [ReportPortal](http://reportportal.io/)<br>
 [ReportPortal on GitHub](https://github.com/reportportal)
 
@@ -28,5 +28,5 @@ nightwatch --config examples/nightwatch.json --reporter examples/reporter.js
 
 To run example:
 ```cmd
-npm t
+npm test
 ```
