@@ -1,5 +1,5 @@
 {
-  "name": "agent-js-nightwatch",
+  "name": "@reportportal/agent-js-nightwatch",
   "version": "0.2.0",
   "description": "Agent for integration Nightwatch with ReportPortal.",
   "main": "./src/index.js",
