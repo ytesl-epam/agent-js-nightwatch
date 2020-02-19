@@ -4,10 +4,10 @@ Agent for integration NightwatchJS with ReportPortal.
 * More about [NightwatchJS](https://nightwatchjs.org/)
 * More about [ReportPortal](http://reportportal.io/)
 
-## How to use
+## Usage
 1. Install the agent in your project:
     ```cmd
-    npm install --save-dev agent-js-nightwatch
+    npm install --save-dev @reportportal/agent-js-nightwatch
     ```
 2. Create rp.json file with reportportal configuration:
     ```json
