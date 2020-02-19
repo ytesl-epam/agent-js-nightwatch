@@ -2,7 +2,12 @@
   "name": "agent-js-nightwatch",
   "version": "0.1.0",
   "description": "Agent for integration Nightwatch with ReportPortal.",
-  "main": "./src/nightwatch-reportportal-reporter",
+  "main": "./src/index.js",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reportportal/agent-js-nightwatch.git"
+  },
   "scripts": {
     "lint": "eslint \"./**/*.js\"",
     "format": "npm run lint -- --fix",
@@ -29,12 +34,10 @@
     "eslint-plugin-promise": "^4.2.1",
     "prettier": "^1.19.1"
   },
-  "author": "Yuriy Teslenko",
-  "license": "Apache 2.0",
-  "repository": {
-    "type": "git"
+  "directories": {
+    "src": "./src"
   },
   "engines": {
-    "node": ">= 8.0.0"
+    "node": ">= 8.0.x"
   }
 }
