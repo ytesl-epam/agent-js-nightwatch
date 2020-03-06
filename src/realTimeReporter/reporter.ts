@@ -10,6 +10,7 @@ import {
   ReportPortalConfig,
   StartTestItemRQ,
   Attribute,
+  LogRQ,
 } from '../models';
 
 interface TestItem {
@@ -24,16 +25,17 @@ export default class Reporter {
   private testItems: Array<TestItem>; // TODO: move it to the store in the future
 
   constructor(config: ReportPortalConfig) {
-    this.registerEventsListeners();
+    this.registerEventListeners();
 
     this.client = new RPClient(config);
     this.testItems = [];
   }
 
-  private registerEventsListeners(): void {
+  private registerEventListeners(): void {
     subscribeToEvent(EVENTS.START_TEST_ITEM, this.startTestItem.bind(this));
     subscribeToEvent(EVENTS.FINISH_TEST_ITEM, this.finishTestItem.bind(this));
 
+    subscribeToEvent(CLIENT_EVENTS.ADD_LOG, this.sendLogToItem.bind(this));
     subscribeToEvent(CLIENT_EVENTS.ADD_ATTRIBUTES, this.setItemAttributes.bind(this));
     subscribeToEvent(CLIENT_EVENTS.ADD_DESCRIPTION, this.addItemDescription.bind(this));
   };
@@ -48,14 +50,14 @@ export default class Reporter {
         status: STATUSES.PASSED,
       };
     }
-    const currentTestItem = testResult.results.testcases
+    const currentTestItemResults = testResult.results.testcases
         ? testResult.results.testcases[testResult.name]
         : testResult.results;
-
     let status;
-    if (currentTestItem.skipped !== 0) {
+
+    if (currentTestItemResults.skipped !== 0) {
       status = STATUSES.SKIPPED;
-    } else if (currentTestItem.failed !== 0) {
+    } else if (currentTestItemResults.failed !== 0) {
       status = STATUSES.FAILED;
     } else {
       status = STATUSES.PASSED;
@@ -93,6 +95,12 @@ export default class Reporter {
     const finishItemObj = { ...data, ...finishTestItemObj };
 
     this.client.finishTestItem(id, finishItemObj);
+  };
+
+  public sendLogToItem(data: LogRQ): void {
+    const currentItem = this.getLastItem();
+
+    this.client.sendLog(currentItem.id, data);
   };
 
   public setItemAttributes(data: { attributes: Array<Attribute> }): void {

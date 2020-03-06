@@ -1,4 +1,4 @@
-const { PublicReportingAPI } = require('../../../build');
+const { PublicReportingAPI, LOG_LEVELS } = require('../../../build');
 
 module.exports = {
   before: function (browser, done) {
@@ -37,6 +37,8 @@ module.exports = {
     client
       .url('https://google.com')
       .waitForElementPresent('body', 1000);
+
+    PublicReportingAPI.addLog(LOG_LEVELS.INFO, 'Info log for demo test item');
 
     PublicReportingAPI.addDescription('Demo test for google.com');
   },
