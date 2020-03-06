@@ -2,7 +2,7 @@ import RPClient from 'reportportal-client';
 // @ts-ignore
 import { EVENTS as CLIENT_EVENTS } from 'reportportal-client/lib/events';
 import { getLastItem } from '../utils';
-import { STATUSES, EVENTS } from '../constants';
+import {STATUSES, EVENTS, LOG_LEVELS} from '../constants';
 import { subscribeToEvent } from './utils';
 import {
   StartLaunchRQ,
@@ -44,21 +44,27 @@ export default class Reporter {
     return getLastItem(this.testItems);
   };
 
-  private getItemDataObj(testResult: any): FinishTestItemRQ {
+  private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
     if (!testResult) {
       return {
         status: STATUSES.PASSED,
       };
     }
-    const currentTestItemResults = testResult.results.testcases
-        ? testResult.results.testcases[testResult.name]
-        : testResult.results;
+
+    const currentTestItemResults = testResult.results.testcases[testResult.name];
     let status;
 
     if (currentTestItemResults.skipped !== 0) {
       status = STATUSES.SKIPPED;
     } else if (currentTestItemResults.failed !== 0) {
       status = STATUSES.FAILED;
+
+      const itemLog: LogRQ = {
+        level: LOG_LEVELS.ERROR,
+        message: currentTestItemResults.assertions[0].stacktrace,
+      };
+
+      this.client.sendLog(id, itemLog);
     } else {
       status = STATUSES.PASSED;
     }
@@ -76,7 +82,7 @@ export default class Reporter {
     this.client.finishLaunch(this.launchId, launchFinishObj);
   };
 
-  public startTestItem(startTestItemObj: StartTestItemRQ): void {
+  private startTestItem(startTestItemObj: StartTestItemRQ): void {
     const parentItem = this.getLastItem();
     const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentItem ? parentItem.id : undefined);
 
@@ -89,27 +95,27 @@ export default class Reporter {
     this.testItems.push(testItem);
   };
 
-  public finishTestItem(testResult: any): void { // for now support only sync reporting
-    const finishTestItemObj = this.getItemDataObj(testResult);
+  private finishTestItem(testResult: any): void { // for now support only sync reporting
     const { id, ...data } = this.testItems.pop();
+    const finishTestItemObj = this.getItemDataObj(testResult, id);
     const finishItemObj = { ...data, ...finishTestItemObj };
 
     this.client.finishTestItem(id, finishItemObj);
   };
 
-  public sendLogToItem(data: LogRQ): void {
+  private sendLogToItem(data: LogRQ): void {
     const currentItem = this.getLastItem();
 
     this.client.sendLog(currentItem.id, data);
   };
 
-  public setItemAttributes(data: { attributes: Array<Attribute> }): void {
+  private setItemAttributes(data: { attributes: Array<Attribute> }): void {
     const currentItem = this.getLastItem();
 
     currentItem.attributes = currentItem.attributes.concat(data.attributes);
   };
 
-  public addItemDescription(data: { text: string }): void {
+  private addItemDescription(data: { text: string }): void {
     const currentItem = this.getLastItem();
 
     currentItem.description = `${currentItem.description}
