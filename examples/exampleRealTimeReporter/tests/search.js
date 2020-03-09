@@ -38,6 +38,8 @@ module.exports = {
       .url('https://google.com')
       .waitForElementPresent('body', 1000);
 
+    PublicReportingAPI.logInfo('Info log for demo test item');
+
     PublicReportingAPI.addDescription('Demo test for google.com');
   },
 

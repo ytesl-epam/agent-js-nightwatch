@@ -3,4 +3,5 @@ export enum LOG_LEVELS {
     DEBUG = 'DEBUG',
     INFO = 'INFO',
     ERROR = 'ERROR',
+    FATAL = 'FATAL',
 }

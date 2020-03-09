@@ -6,7 +6,7 @@ declare module 'reportportal-client' {
         public finishLaunch(launchId: string, launchObj: any): any;
         public startTestItem(itemObj: any, launchId: string, parentId?: string): any;
         public finishTestItem(itemId: string, itemObj: any): any;
-        public sendLog(itemId: string, itemObj: any, fileObj: any): any;
+        public sendLog(itemId: string, itemObj: any, fileObj?: any): any;
         public checkConnect(): any;
     }
 }

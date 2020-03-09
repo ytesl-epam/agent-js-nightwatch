@@ -2,7 +2,7 @@ import RPClient from 'reportportal-client';
 // @ts-ignore
 import { EVENTS as CLIENT_EVENTS } from 'reportportal-client/lib/events';
 import { getLastItem } from '../utils';
-import { STATUSES, EVENTS } from '../constants';
+import {STATUSES, EVENTS, LOG_LEVELS} from '../constants';
 import { subscribeToEvent } from './utils';
 import {
   StartLaunchRQ,
@@ -10,6 +10,7 @@ import {
   ReportPortalConfig,
   StartTestItemRQ,
   Attribute,
+  LogRQ,
 } from '../models';
 
 interface TestItem {
@@ -24,16 +25,17 @@ export default class Reporter {
   private testItems: Array<TestItem>; // TODO: move it to the store in the future
 
   constructor(config: ReportPortalConfig) {
-    this.registerEventsListeners();
+    this.registerEventListeners();
 
     this.client = new RPClient(config);
     this.testItems = [];
   }
 
-  private registerEventsListeners(): void {
+  private registerEventListeners(): void {
     subscribeToEvent(EVENTS.START_TEST_ITEM, this.startTestItem.bind(this));
     subscribeToEvent(EVENTS.FINISH_TEST_ITEM, this.finishTestItem.bind(this));
 
+    subscribeToEvent(CLIENT_EVENTS.ADD_LOG, this.sendLogToItem.bind(this));
     subscribeToEvent(CLIENT_EVENTS.ADD_ATTRIBUTES, this.setItemAttributes.bind(this));
     subscribeToEvent(CLIENT_EVENTS.ADD_DESCRIPTION, this.addItemDescription.bind(this));
   };
@@ -42,21 +44,27 @@ export default class Reporter {
     return getLastItem(this.testItems);
   };
 
-  private getItemDataObj(testResult: any): FinishTestItemRQ {
+  private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
     if (!testResult) {
       return {
         status: STATUSES.PASSED,
       };
     }
-    const currentTestItem = testResult.results.testcases
-        ? testResult.results.testcases[testResult.name]
-        : testResult.results;
 
+    const currentTestItemResults = testResult.results.testcases[testResult.name];
     let status;
-    if (currentTestItem.skipped !== 0) {
+
+    if (currentTestItemResults.skipped !== 0) {
       status = STATUSES.SKIPPED;
-    } else if (currentTestItem.failed !== 0) {
+    } else if (currentTestItemResults.failed !== 0) {
       status = STATUSES.FAILED;
+
+      const itemLog: LogRQ = {
+        level: LOG_LEVELS.ERROR,
+        message: currentTestItemResults.assertions[0].stacktrace,
+      };
+
+      this.client.sendLog(id, itemLog);
     } else {
       status = STATUSES.PASSED;
     }
@@ -74,7 +82,7 @@ export default class Reporter {
     this.client.finishLaunch(this.launchId, launchFinishObj);
   };
 
-  public startTestItem(startTestItemObj: StartTestItemRQ): void {
+  private startTestItem(startTestItemObj: StartTestItemRQ): void {
     const parentItem = this.getLastItem();
     const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentItem ? parentItem.id : undefined);
 
@@ -87,21 +95,27 @@ export default class Reporter {
     this.testItems.push(testItem);
   };
 
-  public finishTestItem(testResult: any): void { // for now support only sync reporting
-    const finishTestItemObj = this.getItemDataObj(testResult);
+  private finishTestItem(testResult: any): void { // for now support only sync reporting
     const { id, ...data } = this.testItems.pop();
+    const finishTestItemObj = this.getItemDataObj(testResult, id);
     const finishItemObj = { ...data, ...finishTestItemObj };
 
     this.client.finishTestItem(id, finishItemObj);
   };
 
-  public setItemAttributes(data: { attributes: Array<Attribute> }): void {
+  private sendLogToItem(data: LogRQ): void {
+    const currentItem = this.getLastItem();
+
+    this.client.sendLog(currentItem.id, data);
+  };
+
+  private setItemAttributes(data: { attributes: Array<Attribute> }): void {
     const currentItem = this.getLastItem();
 
     currentItem.attributes = currentItem.attributes.concat(data.attributes);
   };
 
-  public addItemDescription(data: { text: string }): void {
+  private addItemDescription(data: { text: string }): void {
     const currentItem = this.getLastItem();
 
     currentItem.description = `${currentItem.description}
