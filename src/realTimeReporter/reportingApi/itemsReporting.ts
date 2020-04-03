@@ -25,18 +25,19 @@ export const itemsReporting: ItemsReportingInterface = {
         publishEvent(EVENTS.FINISH_TEST_ITEM, data);
     },
 
-    startTestCase(data: StartTestItemRQ): void {
-        const codeRef = getCodeRef(data.name);
-        const testObj = {
+    startTestCase(currentTest: any): void {
+        const codeRef = getCodeRef(currentTest.name);
+        const testObj: StartTestItemRQ = {
             type: TEST_ITEM_TYPES.STEP,
             codeRef,
-            ...data,
+            name: currentTest.name,
+            retry: !!currentTest.results.retries,
         };
 
         publishEvent(EVENTS.START_TEST_ITEM, testObj);
     },
 
-    finishTestCase(data: FinishTestItemRQ): void {
+    finishTestCase(data: any): void {
         publishEvent(EVENTS.FINISH_TEST_ITEM, data);
     },
 };

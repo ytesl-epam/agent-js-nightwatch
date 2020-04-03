@@ -15,16 +15,17 @@ module.exports = {
   },
 
   beforeEach: function (browser, done) {
-    const item = {
-      name: browser.currentTest.name,
-    };
-
-    PublicReportingAPI.startTestCase(item);
+    PublicReportingAPI.startTestCase(browser.currentTest);
     done();
   },
 
   afterEach: function (browser, done) {
     PublicReportingAPI.finishTestCase(browser.currentTest);
+
+    PublicReportingAPI.startAfterTestCase();
+    // afterEach related actions
+    PublicReportingAPI.finishAfterTestCase();
+
     done();
   },
 
