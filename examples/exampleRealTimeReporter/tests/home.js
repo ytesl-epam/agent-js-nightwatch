@@ -4,6 +4,8 @@ const suiteName = 'Home';
 
 describe(suiteName, function() {
 
+  this.retries(3);
+
   before((browser, done) => {
     const item = {
       name: suiteName,
@@ -26,21 +28,12 @@ describe(suiteName, function() {
   });
 
   beforeEach((browser, done) => {
-    const item = {
-      name: browser.currentTest.name,
-    };
-
-    PublicReportingAPI.startTestCase(item);
+    PublicReportingAPI.startTestCase(browser.currentTest);
     done();
   });
 
   afterEach((browser, done) => {
     PublicReportingAPI.finishTestCase(browser.currentTest);
-
-    PublicReportingAPI.startAfterTestCase();
-    // afterEach related actions
-    PublicReportingAPI.finishAfterTestCase();
-
     done();
   });
 
