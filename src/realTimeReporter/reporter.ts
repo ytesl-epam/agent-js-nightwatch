@@ -2,19 +2,21 @@ import RPClient from 'reportportal-client';
 // @ts-ignore
 import { EVENTS as CLIENT_EVENTS } from 'reportportal-client/lib/events';
 import { getLastItem } from '../utils';
-import { STATUSES, EVENTS, LOG_LEVELS } from '../constants';
-import { subscribeToEvent, setDefaultFileType, getStartLaunchObj } from './utils';
+import { EVENTS, LOG_LEVELS, STATUSES } from '../constants';
+import { getStartLaunchObj, setDefaultFileType, subscribeToEvent } from './utils';
 import {
-  StartLaunchRQ,
-  FinishTestItemRQ,
-  ReportPortalConfig,
-  StartTestItemRQ,
   Attribute,
+  FinishTestItemRQ,
   LogRQ,
+  ReportPortalConfig,
+  StartLaunchRQ,
+  StartTestItemRQ,
 } from '../models';
 
 interface TestItem {
   id: string;
+  name: string;
+  parentId?: string;
   attributes?: Array<Attribute>;
   description?: string;
 }
@@ -22,7 +24,7 @@ interface TestItem {
 export default class Reporter {
   private client: RPClient;
   private launchId: string;
-  private testItems: Array<TestItem>; // TODO: move it to the store in the future
+  private testItems: Array<TestItem>; // TODO: move it to the store in the near future
 
   constructor(config: ReportPortalConfig) {
     this.registerEventListeners();
@@ -45,8 +47,26 @@ export default class Reporter {
     return getLastItem(this.testItems);
   };
 
+  private getTestItemByName(itemName: string, eject: boolean): TestItem {
+    if (itemName) {
+      const itemIndex = this.testItems.findIndex((item) => item.name === itemName);
+
+      if (itemIndex !== -1) {
+        const item = this.testItems[itemIndex];
+
+        if (eject) {
+          this.testItems.splice(itemIndex, 1);
+        }
+
+        return item;
+      }
+    }
+
+    return eject ? this.testItems.pop() : this.getLastItem();
+  };
+
   private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
-    if (!testResult) {
+    if (!testResult || !testResult.results) {
       return {
         status: STATUSES.PASSED,
       };
@@ -88,11 +108,13 @@ ${assertionsResult.stackTrace}`,
   };
 
   private startTestItem(startTestItemObj: StartTestItemRQ): void {
-    const parentItem = this.getLastItem();
-    const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentItem ? parentItem.id : undefined);
+    const parentItem = this.getTestItemByName(startTestItemObj.parentName, false);
+    const parentId = parentItem ? parentItem.id : undefined;
+    const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentId);
 
     const testItem: TestItem = {
       id: itemObj.tempId,
+      name: startTestItemObj.name,
       attributes: [],
       description: startTestItemObj.description || '',
     };
@@ -100,8 +122,8 @@ ${assertionsResult.stackTrace}`,
     this.testItems.push(testItem);
   };
 
-  private finishTestItem(testResult: any): void { // for now support only sync reporting
-    const { id, ...data } = this.testItems.pop();
+  private finishTestItem(testResult: any): void {
+    const { id, ...data } = this.getTestItemByName(testResult.name, true);
     const finishTestItemObj = this.getItemDataObj(testResult, id);
     const finishItemObj = { ...data, ...finishTestItemObj };
 

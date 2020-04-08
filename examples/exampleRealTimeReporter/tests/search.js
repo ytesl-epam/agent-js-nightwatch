@@ -2,10 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const { PublicReportingAPI, FILE_TYPES } = require('../../../build');
 
+const suiteName = 'Search';
+
 module.exports = {
   before: function (browser, done) {
     const item = {
-      name: 'Search',
+      name: suiteName,
       description: 'Suite description',
       attributes: [{ key: 'suite', value: 'search' }],
     };
@@ -15,7 +17,7 @@ module.exports = {
   },
 
   beforeEach: function (browser, done) {
-    PublicReportingAPI.startTestCase(browser.currentTest);
+    PublicReportingAPI.startTestCase(browser.currentTest, suiteName);
     done();
   },
 
@@ -30,7 +32,7 @@ module.exports = {
   },
 
   after: function (browser, done) {
-    PublicReportingAPI.finishSuite();
+    PublicReportingAPI.finishSuite({ name: suiteName });
     browser.end();
     done();
   },
@@ -38,7 +40,7 @@ module.exports = {
   'demo test google' : function (client) {
     client
       .url('https://google.com')
-      .waitForElementPresent('body', 1000);
+      .waitForElementPresent('foo', 1000);
 
     PublicReportingAPI.logInfo('Info log for demo test item');
     PublicReportingAPI.launchLogDebug('Debug log for launch');

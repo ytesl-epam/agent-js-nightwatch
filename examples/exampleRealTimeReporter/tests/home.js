@@ -22,13 +22,13 @@ describe(suiteName, function() {
   });
 
   after((browser, done) => {
-    PublicReportingAPI.finishSuite();
+    PublicReportingAPI.finishSuite({ name: suiteName });
     browser.end();
     done();
   });
 
   beforeEach((browser, done) => {
-    PublicReportingAPI.startTestCase(browser.currentTest);
+    PublicReportingAPI.startTestCase(browser.currentTest, suiteName);
     done();
   });
 
@@ -62,11 +62,17 @@ describe(suiteName, function() {
   test('beta test', function(browser) {
     PublicReportingAPI.setDescription('Demo test for ecosia.org #2');
 
+    let expectedMainlineText = 'Nightwatch.jsasd';
+
+    if (browser.currentTest.results.retries > 2) {
+      expectedMainlineText = 'Nightwatch.js';
+    }
+
     browser
       .url('https://www.ecosia.org/')
       .setValue('input[type=search]', 'nightwatch')
       .click('button[type=submit]')
-      .assert.containsText('.mainline-results', 'Nightwatch.jsasd')
+      .assert.containsText('.mainline-results', expectedMainlineText)
       .end();
   });
 });
