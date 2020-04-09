@@ -32,7 +32,7 @@ export const hooksReporting: HooksReportingInterface = {
     },
 
     finishBeforeSuite(data: FinishTestItemRQ): void {
-        publishEvent(EVENTS.FINISH_TEST_ITEM, data);
+        publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before suite', ...data });
     },
 
     startAfterSuite(data: StartTestItemRQ): void {
@@ -50,7 +50,7 @@ export const hooksReporting: HooksReportingInterface = {
     },
 
     finishAfterSuite(data: FinishTestItemRQ): void {
-        publishEvent(EVENTS.FINISH_TEST_ITEM, data);
+        publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After suite', ...data });
     },
 
     startBeforeTestCase(data: StartTestItemRQ): void {
@@ -68,7 +68,7 @@ export const hooksReporting: HooksReportingInterface = {
     },
 
     finishBeforeTestCase(data: FinishTestItemRQ): void {
-        publishEvent(EVENTS.FINISH_TEST_ITEM, data);
+        publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before test', ...data });
     },
 
     startAfterTestCase(data: StartTestItemRQ): void {
@@ -86,6 +86,6 @@ export const hooksReporting: HooksReportingInterface = {
     },
 
     finishAfterTestCase(data: FinishTestItemRQ): void {
-        publishEvent(EVENTS.FINISH_TEST_ITEM, data);
+        publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After test', ...data });
     },
 };

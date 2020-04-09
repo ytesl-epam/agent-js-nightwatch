@@ -12,7 +12,8 @@ export interface StartTestItemRQ extends RPItemStartRQ {
     launchUuid?: string;
     testCaseHash?: number;
     testCaseId?: string;
-    uniqueId?: string
+    uniqueId?: string;
+    parentName?: string;
 }
 
 export interface FinishTestItemRQ extends RPItemFinishRQ {

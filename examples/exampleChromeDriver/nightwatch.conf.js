@@ -2,6 +2,7 @@ const chromedriver = require('chromedriver');
 
 module.exports = {
   src_folders : ['./exampleChromeDriver/tests'],
+  test_workers: true,
 
   test_settings: {
     default: {
