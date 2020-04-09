@@ -55,6 +55,8 @@ describe(suiteName, function() {
       .assert.containsText('.mainline-results', 'Nightwatch.js')
       .end();
 
+    PublicReportingAPI.logInfo('Info log for suite', null, suiteName);
+
     PublicReportingAPI.addAttributes([{ key: 'check', value: 'success' }]);
     PublicReportingAPI.setDescription('Attributes added to the test item');
   });

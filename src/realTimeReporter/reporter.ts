@@ -16,7 +16,6 @@ import {
 interface TestItem {
   id: string;
   name: string;
-  parentId?: string;
   attributes?: Array<Attribute>;
   description?: string;
 }
@@ -24,7 +23,7 @@ interface TestItem {
 export default class Reporter {
   private client: RPClient;
   private launchId: string;
-  private testItems: Array<TestItem>; // TODO: move it to the store in the near future
+  private testItems: Array<TestItem>; // TODO: move it to the store in the future
 
   constructor(config: ReportPortalConfig) {
     this.registerEventListeners();
@@ -47,7 +46,7 @@ export default class Reporter {
     return getLastItem(this.testItems);
   };
 
-  private getTestItemByName(itemName: string, eject: boolean): TestItem {
+  private getTestItemByName(itemName: string, eject: boolean = false): TestItem {
     if (itemName) {
       const itemIndex = this.testItems.findIndex((item) => item.name === itemName);
 
@@ -108,7 +107,7 @@ ${assertionsResult.stackTrace}`,
   };
 
   private startTestItem(startTestItemObj: StartTestItemRQ): void {
-    const parentItem = this.getTestItemByName(startTestItemObj.parentName, false);
+    const parentItem = this.getTestItemByName(startTestItemObj.parentName);
     const parentId = parentItem ? parentItem.id : undefined;
     const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentId);
 
@@ -130,9 +129,9 @@ ${assertionsResult.stackTrace}`,
     this.client.finishTestItem(id, finishItemObj);
   };
 
-  private sendLogToItem(data: LogRQ): void {
-    const currentItem = this.getLastItem();
-    const { file, ...log } = data;
+  private sendLogToItem(data: { log: LogRQ; suite?: string }): void {
+    const { log: { file, ...log }, suite: suiteName } = data;
+    const currentItem = this.getTestItemByName(suiteName);
     const fileToSend = setDefaultFileType(file);
 
     this.client.sendLog(currentItem.id, log, fileToSend);
@@ -145,14 +144,14 @@ ${assertionsResult.stackTrace}`,
     this.client.sendLog(this.launchId, log, fileToSend);
   }
 
-  private addItemAttributes(data: { attributes: Array<Attribute> }): void {
-    const currentItem = this.getLastItem();
+  private addItemAttributes(data: { attributes: Array<Attribute>, suite?: string }): void {
+    const currentItem = this.getTestItemByName(data.suite);
 
     currentItem.attributes = currentItem.attributes.concat(data.attributes);
   };
 
-  private setItemDescription(data: { text: string }): void {
-    const currentItem = this.getLastItem();
+  private setItemDescription(data: { text: string, suite?: string }): void {
+    const currentItem = this.getTestItemByName(data.suite);
 
     currentItem.description = data.text;
   };
