@@ -59,9 +59,7 @@ export default class Reporter {
   }
 
   private removeItemById(id: string): void {
-    const itemIndex = this.testItems.findIndex((item) => item.id === id);
-
-    this.testItems.splice(itemIndex, 1);
+    this.testItems = this.testItems.filter((item) => item.id !== id);
   }
 
   private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
