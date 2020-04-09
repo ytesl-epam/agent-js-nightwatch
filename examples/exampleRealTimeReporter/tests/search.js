@@ -32,7 +32,7 @@ module.exports = {
   },
 
   after: function (browser, done) {
-    PublicReportingAPI.finishSuite({ name: suiteName });
+    PublicReportingAPI.finishSuite(suiteName);
     browser.end();
     done();
   },

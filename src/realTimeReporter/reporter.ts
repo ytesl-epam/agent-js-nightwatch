@@ -46,23 +46,23 @@ export default class Reporter {
     return getLastItem(this.testItems);
   };
 
-  private getTestItemByName(itemName: string, eject: boolean = false): TestItem {
-    if (itemName) {
-      const itemIndex = this.testItems.findIndex((item) => item.name === itemName);
+  private getTestItemByName(itemName: string): TestItem {
+    const testItem = this.testItems.find((item) => item.name === itemName);
 
-      if (itemIndex !== -1) {
-        const item = this.testItems[itemIndex];
-
-        if (eject) {
-          this.testItems.splice(itemIndex, 1);
-        }
-
-        return item;
-      }
-    }
-
-    return eject ? this.testItems.pop() : this.getLastItem();
+    return testItem || null;
   };
+
+  private getCurrentItem(itemName: string): TestItem {
+    const itemByName = this.getTestItemByName(itemName);
+
+    return itemByName || this.getLastItem();
+  }
+
+  private removeItemById(id: string): void {
+    const itemIndex = this.testItems.findIndex((item) => item.id === id);
+
+    this.testItems.splice(itemIndex, 1);
+  }
 
   private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
     if (!testResult || !testResult.results) {
@@ -107,7 +107,7 @@ ${assertionsResult.stackTrace}`,
   };
 
   private startTestItem(startTestItemObj: StartTestItemRQ): void {
-    const parentItem = this.getTestItemByName(startTestItemObj.parentName);
+    const parentItem = this.getCurrentItem(startTestItemObj.parentName);
     const parentId = parentItem ? parentItem.id : undefined;
     const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentId);
 
@@ -122,16 +122,17 @@ ${assertionsResult.stackTrace}`,
   };
 
   private finishTestItem(testResult: any): void {
-    const { id, ...data } = this.getTestItemByName(testResult.name, true);
+    const { id, ...data } = this.getTestItemByName(testResult.name);
     const finishTestItemObj = this.getItemDataObj(testResult, id);
     const finishItemObj = { ...data, ...finishTestItemObj };
 
+    this.removeItemById(id);
     this.client.finishTestItem(id, finishItemObj);
   };
 
   private sendLogToItem(data: { log: LogRQ; suite?: string }): void {
     const { log: { file, ...log }, suite: suiteName } = data;
-    const currentItem = this.getTestItemByName(suiteName);
+    const currentItem = this.getCurrentItem(suiteName);
     const fileToSend = setDefaultFileType(file);
 
     this.client.sendLog(currentItem.id, log, fileToSend);
@@ -145,13 +146,13 @@ ${assertionsResult.stackTrace}`,
   }
 
   private addItemAttributes(data: { attributes: Array<Attribute>, suite?: string }): void {
-    const currentItem = this.getTestItemByName(data.suite);
+    const currentItem = this.getCurrentItem(data.suite);
 
     currentItem.attributes = currentItem.attributes.concat(data.attributes);
   };
 
   private setItemDescription(data: { text: string, suite?: string }): void {
-    const currentItem = this.getTestItemByName(data.suite);
+    const currentItem = this.getCurrentItem(data.suite);
 
     currentItem.description = data.text;
   };
