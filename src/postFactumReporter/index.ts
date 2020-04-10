@@ -2,7 +2,7 @@ import fs from 'fs';
 import moment from 'moment';
 import RPClient from 'reportportal-client';
 import { AgentOptions, ReportPortalConfig } from '../models';
-import { getLastItem } from '../utils';
+import { buildCodeRef, getSystemAttributes, getLastItem } from '../utils';
 import { STATUSES, LOG_LEVELS, TEST_ITEM_TYPES, EVENTS, FILE_TYPES } from '../constants';
 import { getScreenshotPossiblePaths, normalizeFileName } from './utils';
 
@@ -31,11 +31,18 @@ export default class PostFactumReporter {
   }
 
   constructor(config: ReportPortalConfig & AgentOptions) {
-    const { attributes, description, screenshotsPath, ...clientConfig } = config;
+    const {
+      attributes = [],
+      description,
+      screenshotsPath,
+      parallelRun = false,
+      ...clientConfig
+    } = config;
+    const launchAttributes = attributes.concat(getSystemAttributes());
 
     this.client = new RPClient(clientConfig);
-    this.launchParams = { attributes, description };
-    this.options = { screenshotsPath };
+    this.launchParams = { attributes: launchAttributes, description };
+    this.options = { screenshotsPath, parallelRun };
     this.launchStartTime = Date.now();
   }
 
@@ -113,20 +120,28 @@ export default class PostFactumReporter {
   }
 
   private collectItems(results: any) {
+    const { parallelRun } = this.options;
     const items = [];
     const suiteNames = Object.keys(results.modules);
+    let nextSuiteStartTime = new Date(this.launchStartTime);
 
     for (const suiteName of suiteNames) {
       const suite = results.modules[suiteName];
-      const suiteStartTime = new Date(this.launchStartTime); // TODO: fix items startTime calculation
+      const suiteCodeRef = buildCodeRef(suite.modulePath);
+      const suiteStartTime = nextSuiteStartTime;
       const suiteEndTime = moment(suiteStartTime)
         .add(suite.time, 's')
         .toDate();
+
+      if (!parallelRun) {
+        nextSuiteStartTime = suiteEndTime;
+      }
 
       items.push({
         action: EVENTS.START_TEST_ITEM,
         name: suiteName,
         startTime: suiteStartTime,
+        codeRef: suiteCodeRef,
         type: TEST_ITEM_TYPES.SUITE,
       });
 
@@ -149,6 +164,7 @@ export default class PostFactumReporter {
           action: EVENTS.START_TEST_ITEM,
           name: testName,
           startTime: testStartTime,
+          codeRef: `${suiteCodeRef}/${testName}`,
           type: TEST_ITEM_TYPES.STEP,
         });
 
