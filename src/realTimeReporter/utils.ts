@@ -1,6 +1,5 @@
-import path from 'path';
 import { EVENTS, DEFAULT_FILE_TYPE } from '../constants';
-import { getSystemAttributes } from '../utils';
+import { getSystemAttributes, buildCodeRef } from '../utils';
 import { Attachment, StartLaunchRQ, Attribute } from '../models';
 
 export const publishEvent = (event: EVENTS, msg: any): void => {
@@ -28,13 +27,8 @@ export const getStartLaunchObj = (launchObj: StartLaunchRQ): StartLaunchRQ => {
 export const getCodeRef = (itemName: string): string => {
   const caller = getCaller();
   const testPath = caller.getFileName();
-  const workingDir = process.cwd();
 
-  const codeRef = testPath
-      .replace(`${workingDir}${path.sep}`, '')
-      .replace(/[\\/]/g, '/');
-
-  return `${codeRef}/${itemName}`;
+  return buildCodeRef(testPath, itemName);
 };
 
 const getCaller = (): NodeJS.CallSite => {

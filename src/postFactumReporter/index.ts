@@ -2,7 +2,7 @@ import fs from 'fs';
 import moment from 'moment';
 import RPClient from 'reportportal-client';
 import { AgentOptions, ReportPortalConfig } from '../models';
-import { getLastItem } from '../utils';
+import { buildCodeRef, getSystemAttributes, getLastItem } from '../utils';
 import { STATUSES, LOG_LEVELS, TEST_ITEM_TYPES, EVENTS, FILE_TYPES } from '../constants';
 import { getScreenshotPossiblePaths, normalizeFileName } from './utils';
 
@@ -31,10 +31,11 @@ export default class PostFactumReporter {
   }
 
   constructor(config: ReportPortalConfig & AgentOptions) {
-    const { attributes, description, screenshotsPath, ...clientConfig } = config;
+    const { attributes = [], description, screenshotsPath, ...clientConfig } = config;
+    const launchAttributes = attributes.concat(getSystemAttributes());
 
     this.client = new RPClient(clientConfig);
-    this.launchParams = { attributes, description };
+    this.launchParams = { attributes: launchAttributes, description };
     this.options = { screenshotsPath };
     this.launchStartTime = Date.now();
   }
@@ -118,7 +119,8 @@ export default class PostFactumReporter {
 
     for (const suiteName of suiteNames) {
       const suite = results.modules[suiteName];
-      const suiteStartTime = new Date(this.launchStartTime); // TODO: fix items startTime calculation
+      const suiteCodeRef = buildCodeRef(suite.modulePath);
+      const suiteStartTime = new Date(this.launchStartTime);
       const suiteEndTime = moment(suiteStartTime)
         .add(suite.time, 's')
         .toDate();
@@ -127,6 +129,7 @@ export default class PostFactumReporter {
         action: EVENTS.START_TEST_ITEM,
         name: suiteName,
         startTime: suiteStartTime,
+        codeRef: suiteCodeRef,
         type: TEST_ITEM_TYPES.SUITE,
       });
 
@@ -149,6 +152,7 @@ export default class PostFactumReporter {
           action: EVENTS.START_TEST_ITEM,
           name: testName,
           startTime: testStartTime,
+          codeRef: `${suiteCodeRef}/${testName}`,
           type: TEST_ITEM_TYPES.STEP,
         });
 
