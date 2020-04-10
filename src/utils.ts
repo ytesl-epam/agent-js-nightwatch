@@ -29,7 +29,7 @@ export const buildCodeRef = (testPath: string, itemName: string = ''): string =>
 
     const codeRef = testPath
         .replace(`${workingDir}${path.sep}`, '')
-        .replace(/[\\/]/g, '/');
+        .replace(/\\/g, '/');
 
     return itemName ? `${codeRef}/${itemName}` : codeRef;
 };
