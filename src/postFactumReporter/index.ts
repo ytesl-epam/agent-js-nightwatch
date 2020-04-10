@@ -31,12 +31,18 @@ export default class PostFactumReporter {
   }
 
   constructor(config: ReportPortalConfig & AgentOptions) {
-    const { attributes = [], description, screenshotsPath, ...clientConfig } = config;
+    const {
+      attributes = [],
+      description,
+      screenshotsPath,
+      parallelRun = false,
+      ...clientConfig
+    } = config;
     const launchAttributes = attributes.concat(getSystemAttributes());
 
     this.client = new RPClient(clientConfig);
     this.launchParams = { attributes: launchAttributes, description };
-    this.options = { screenshotsPath };
+    this.options = { screenshotsPath, parallelRun };
     this.launchStartTime = Date.now();
   }
 
@@ -114,16 +120,22 @@ export default class PostFactumReporter {
   }
 
   private collectItems(results: any) {
+    const { parallelRun } = this.options;
     const items = [];
     const suiteNames = Object.keys(results.modules);
+    let nextSuiteStartTime = new Date(this.launchStartTime);
 
     for (const suiteName of suiteNames) {
       const suite = results.modules[suiteName];
       const suiteCodeRef = buildCodeRef(suite.modulePath);
-      const suiteStartTime = new Date(this.launchStartTime);
+      const suiteStartTime = nextSuiteStartTime;
       const suiteEndTime = moment(suiteStartTime)
         .add(suite.time, 's')
         .toDate();
+
+      if (!parallelRun) {
+        nextSuiteStartTime = suiteEndTime;
+      }
 
       items.push({
         action: EVENTS.START_TEST_ITEM,
