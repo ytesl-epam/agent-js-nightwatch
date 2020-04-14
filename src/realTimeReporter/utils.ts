@@ -19,12 +19,12 @@ import { EVENTS, DEFAULT_FILE_TYPE } from '../constants';
 import { getSystemAttributes, buildCodeRef } from '../utils';
 import { Attachment, StartLaunchRQ, Attribute } from '../models';
 
-export const publishEvent = (event: EVENTS, msg: any): void => {
+export const publishEvent = (event: EVENTS | string, msg: any): void => {
   // @ts-ignore
   process.emit(event, msg);
 };
 
-export const subscribeToEvent = (event: EVENTS, callback: (params: any) => void): void => {
+export const subscribeToEvent = (event: EVENTS | string, callback: (params: any) => void): void => {
   // @ts-ignore
   process.on(event, callback);
 };
@@ -48,7 +48,7 @@ export const getCodeRef = (itemName: string): string => {
   return buildCodeRef(testPath, itemName);
 };
 
-const getCaller = (): NodeJS.CallSite => {
+export const getCaller = (): NodeJS.CallSite | any => {
   const stack = getStack();
 
   // Remove superfluous function calls on stack
@@ -59,7 +59,7 @@ const getCaller = (): NodeJS.CallSite => {
   return stack[1];
 };
 
-const getStack = (): Array<NodeJS.CallSite> => {
+export const getStack = (): Array<NodeJS.CallSite> | Array<any> => {
   // Save original Error.prepareStackTrace
   const origPrepareStackTrace = Error.prepareStackTrace;
 
