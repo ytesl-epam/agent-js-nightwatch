@@ -161,7 +161,7 @@ describe('getCodeRef', function() {
 
     getCodeRef('testItem');
 
-    expect(spyGetCaller).toBeCalledWith();
+    expect(spyGetCaller).toBeCalled();
   });
 
   test('invokes buildCodeRef to create code reference based on the test path and item name', function () {
