@@ -18,9 +18,8 @@
 import RPClient from 'reportportal-client';
 // @ts-ignore
 import { EVENTS as CLIENT_EVENTS } from 'reportportal-client/lib/events';
-import { getLastItem, getAgentInfo } from '../utils';
+import { getAgentInfo } from '../utils';
 import { EVENTS, LOG_LEVELS, STATUSES } from '../constants';
-import { getStartLaunchObj, setDefaultFileType, subscribeToEvent } from './utils';
 import {
   Attribute,
   FinishTestItemRQ,
@@ -28,19 +27,15 @@ import {
   ReportPortalConfig,
   StartLaunchRQ,
   StartTestItemRQ,
+  StorageTestItem,
 } from '../models';
-
-interface TestItem {
-  id: string;
-  name: string;
-  attributes?: Array<Attribute>;
-  description?: string;
-}
+import { getStartLaunchObj, setDefaultFileType, subscribeToEvent } from './utils';
+import { Storage } from './storage';
 
 export default class Reporter {
   private client: RPClient;
   private launchId: string;
-  private testItems: Array<TestItem>; // TODO: move it to the store in the future
+  private storage: Storage;
 
   constructor(config: ReportPortalConfig) {
     this.registerEventListeners();
@@ -48,7 +43,7 @@ export default class Reporter {
     const agentInfo = getAgentInfo();
 
     this.client = new RPClient(config, agentInfo);
-    this.testItems = [];
+    this.storage = new Storage();
   }
 
   private registerEventListeners(): void {
@@ -60,26 +55,6 @@ export default class Reporter {
     subscribeToEvent(CLIENT_EVENTS.ADD_ATTRIBUTES, this.addItemAttributes.bind(this));
     subscribeToEvent(CLIENT_EVENTS.SET_DESCRIPTION, this.setItemDescription.bind(this));
   };
-
-  private getLastItem(): TestItem {
-    return getLastItem(this.testItems);
-  };
-
-  private getTestItemByName(itemName: string): TestItem {
-    const testItem = this.testItems.find((item) => item.name === itemName);
-
-    return testItem || null;
-  };
-
-  private getCurrentItem(itemName: string): TestItem {
-    const itemByName = this.getTestItemByName(itemName);
-
-    return itemByName || this.getLastItem();
-  }
-
-  private removeItemById(id: string): void {
-    this.testItems = this.testItems.filter((item) => item.id !== id);
-  }
 
   private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
     if (!testResult || !testResult.results) {
@@ -124,32 +99,32 @@ ${assertionsResult.stackTrace}`,
   };
 
   private startTestItem(startTestItemObj: StartTestItemRQ): void {
-    const parentItem = this.getCurrentItem(startTestItemObj.parentName);
+    const parentItem = this.storage.getCurrentItem(startTestItemObj.parentName);
     const parentId = parentItem ? parentItem.id : undefined;
     const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentId);
 
-    const testItem: TestItem = {
+    const testItem: StorageTestItem = {
       id: itemObj.tempId,
       name: startTestItemObj.name,
       attributes: [],
       description: startTestItemObj.description || '',
     };
 
-    this.testItems.push(testItem);
+    this.storage.addTestItem(testItem);
   };
 
   private finishTestItem(testResult: any): void {
-    const { id, ...data } = this.getTestItemByName(testResult.name);
+    const { id, ...data } = this.storage.getTestItemByName(testResult.name);
     const finishTestItemObj = this.getItemDataObj(testResult, id);
     const finishItemObj = { ...data, ...finishTestItemObj };
 
-    this.removeItemById(id);
+    this.storage.removeItemById(id);
     this.client.finishTestItem(id, finishItemObj);
   };
 
   private sendLogToItem(data: { log: LogRQ; suite?: string }): void {
     const { log: { file, ...log }, suite: suiteName } = data;
-    const currentItem = this.getCurrentItem(suiteName);
+    const currentItem = this.storage.getCurrentItem(suiteName);
     const fileToSend = setDefaultFileType(file);
 
     this.client.sendLog(currentItem.id, log, fileToSend);
@@ -163,13 +138,13 @@ ${assertionsResult.stackTrace}`,
   }
 
   private addItemAttributes(data: { attributes: Array<Attribute>, suite?: string }): void {
-    const currentItem = this.getCurrentItem(data.suite);
+    const currentItem = this.storage.getCurrentItem(data.suite);
 
     currentItem.attributes = currentItem.attributes.concat(data.attributes);
   };
 
   private setItemDescription(data: { text: string, suite?: string }): void {
-    const currentItem = this.getCurrentItem(data.suite);
+    const currentItem = this.storage.getCurrentItem(data.suite);
 
     currentItem.description = data.text;
   };
