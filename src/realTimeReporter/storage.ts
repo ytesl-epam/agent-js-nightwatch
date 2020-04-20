@@ -21,28 +21,38 @@ import { StorageTestItem } from '../models';
 export class Storage {
   private testItems: Array<StorageTestItem>;
 
-  constructor() {
-    this.testItems = [];
+  constructor(initialItems:Array<StorageTestItem> = []) {
+    this.testItems = initialItems;
   }
 
-  public addTestItem(item: StorageTestItem): void {
-    this.testItems.push(item);
-  }
+  public getAllItems(): Array<StorageTestItem> {
+    return this.testItems;
+  };
 
   public getLastItem(): StorageTestItem {
     return getLastItem(this.testItems);
   };
 
-  public getTestItemByName(itemName: string): StorageTestItem {
+  public getItemByName(itemName: string): StorageTestItem {
     const testItem = this.testItems.find((item) => item.name === itemName);
 
     return testItem || null;
   };
 
+  public getItemById(id: string): StorageTestItem {
+    const testItem = this.testItems.find((item) => item.id === id);
+
+    return testItem || null;
+  }
+
   public getCurrentItem(itemName: string): StorageTestItem {
-    const itemByName = this.getTestItemByName(itemName);
+    const itemByName = this.getItemByName(itemName);
 
     return itemByName || this.getLastItem();
+  }
+
+  public addTestItem(item: StorageTestItem): void {
+    this.testItems.push(item);
   }
 
   public removeItemById(id: string): void {
