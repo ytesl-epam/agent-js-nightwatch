@@ -114,7 +114,7 @@ ${assertionsResult.stackTrace}`,
   };
 
   private finishTestItem(testResult: any): void {
-    const { id, ...data } = this.storage.getItemByName(testResult.name);
+    const { id, ...data } = this.storage.getCurrentItem(testResult.name);
     const finishTestItemObj = this.getItemDataObj(testResult, id);
     const finishItemObj = { ...data, ...finishTestItemObj };
 
