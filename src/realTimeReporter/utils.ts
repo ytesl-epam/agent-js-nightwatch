@@ -15,7 +15,7 @@
  *
  */
 
-import { EVENTS, DEFAULT_FILE_TYPE } from '../constants';
+import { EVENTS, DEFAULT_FILE_TYPE, STATUSES } from '../constants';
 import { getSystemAttributes, buildCodeRef } from '../utils';
 import { Attachment, StartLaunchRQ, Attribute } from '../models';
 
@@ -39,6 +39,29 @@ export const getStartLaunchObj = (launchObj: StartLaunchRQ): StartLaunchRQ => {
     ...launchObj,
     attributes: launchObj.attributes ? launchObj.attributes.concat(systemAttributes) : systemAttributes,
   }
+};
+
+export const calculateTestItemStatus = (testResult: any): { status: STATUSES, assertionsMessage: string } => {
+  const currentTestItemResults = testResult.results.testcases[testResult.name];
+  let assertionsMessage = null;
+  let status;
+
+  if (currentTestItemResults.skipped !== 0) {
+    status = STATUSES.SKIPPED;
+  } else if (currentTestItemResults.failed !== 0) {
+    status = STATUSES.FAILED;
+    const assertionsResult = currentTestItemResults.assertions[0];
+
+    assertionsMessage = `${assertionsResult.fullMsg}
+${assertionsResult.stackTrace}`;
+  } else {
+    status = STATUSES.PASSED;
+  }
+
+  return {
+    status,
+    assertionsMessage,
+  };
 };
 
 export const getCodeRef = (itemName: string): string => {

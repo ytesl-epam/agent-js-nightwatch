@@ -29,19 +29,26 @@ import {
   StartTestItemRQ,
   StorageTestItem,
 } from '../models';
-import { getStartLaunchObj, setDefaultFileType, subscribeToEvent } from './utils';
+import {
+  getStartLaunchObj,
+  setDefaultFileType,
+  subscribeToEvent,
+  calculateTestItemStatus,
+} from './utils';
 import { Storage } from './storage';
 
 export default class Reporter {
   private client: RPClient;
   private launchId: string;
   private storage: Storage;
+  private config: ReportPortalConfig;
 
   constructor(config: ReportPortalConfig) {
     this.registerEventListeners();
 
     const agentInfo = getAgentInfo();
 
+    this.config = config;
     this.client = new RPClient(config, agentInfo);
     this.storage = new Storage();
   }
@@ -56,34 +63,29 @@ export default class Reporter {
     subscribeToEvent(CLIENT_EVENTS.SET_DESCRIPTION, this.setItemDescription.bind(this));
   };
 
-  private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
+  private getFinishItemObj(testResult: any, storageItem: StorageTestItem): FinishTestItemRQ {
+    const { id, ...data } = storageItem;
+
     if (!testResult || !testResult.results) {
       return {
+        ...data,
         status: STATUSES.PASSED,
       };
     }
 
-    const currentTestItemResults = testResult.results.testcases[testResult.name];
-    let status;
+    const { status, assertionsMessage } = calculateTestItemStatus(testResult.results);
 
-    if (currentTestItemResults.skipped !== 0) {
-      status = STATUSES.SKIPPED;
-    } else if (currentTestItemResults.failed !== 0) {
-      status = STATUSES.FAILED;
-      const assertionsResult = currentTestItemResults.assertions[0];
-
+    if (status === STATUSES.FAILED) {
       const itemLog: LogRQ = {
         level: LOG_LEVELS.ERROR,
-        message: `${assertionsResult.fullMsg}
-${assertionsResult.stackTrace}`,
+        message: assertionsMessage,
       };
 
       this.client.sendLog(id, itemLog);
-    } else {
-      status = STATUSES.PASSED;
     }
 
     return {
+      ...data,
       status,
     };
   };
@@ -107,19 +109,19 @@ ${assertionsResult.stackTrace}`,
       id: itemObj.tempId,
       name: startTestItemObj.name,
       attributes: [],
-      description: startTestItemObj.description || '',
+      description: '',
     };
 
     this.storage.addTestItem(testItem);
   };
 
   private finishTestItem(testResult: any): void {
-    const { id, ...data } = this.storage.getCurrentItem(testResult.name);
-    const finishTestItemObj = this.getItemDataObj(testResult, id);
-    const finishItemObj = { ...data, ...finishTestItemObj };
+    const storageItem = this.storage.getCurrentItem(testResult.name);
+    const finishTestItemObj = this.getFinishItemObj(testResult, storageItem);
 
-    this.storage.removeItemById(id);
-    this.client.finishTestItem(id, finishItemObj);
+    this.client.finishTestItem(storageItem.id, finishTestItemObj);
+
+    this.storage.removeItemById(storageItem.id);
   };
 
   private sendLogToItem(data: { log: LogRQ; suite?: string }): void {

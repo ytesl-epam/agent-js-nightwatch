@@ -15,12 +15,15 @@
  *
  */
 
-import { StartLaunchRQ } from '../../models';
-import { RealTimeReporter } from '../../realTimeReporter';
-import * as reporterUtils from '../../realTimeReporter/utils';
-import { getDefaultMockConfig, RPClientMock } from '../mocks';
+import { StartLaunchRQ } from '../../../models';
+import { RealTimeReporter } from '../../../realTimeReporter';
+import * as reporterUtils from '../../../realTimeReporter/utils';
+import {
+  getDefaultMockConfig,
+  RPClientMock,
+} from '../../mocks';
 
-describe('RealTimeReporter', function() {
+describe('launchReporting', function() {
   let reporter: RealTimeReporter;
 
   beforeEach(() => {
@@ -36,19 +39,36 @@ describe('RealTimeReporter', function() {
     jest.clearAllMocks();
   });
 
-  test('startLaunch: should start launch by calling the ReportPortal client startLaunch method', function () {
-    const launchObj: StartLaunchRQ = {
-      description: 'Launch description',
-      attributes: [{ key: 'example', value: 'true' }],
-    };
-    const spyGetStartLaunchObj = jest.spyOn(reporterUtils, 'getStartLaunchObj')
-      .mockReturnValueOnce(launchObj);
+  describe('startLaunch', function () {
+    let spyGetStartLaunchObj: jest.SpyInstance;
 
-    reporter.startLaunch(launchObj);
+    beforeEach(() => {
+      spyGetStartLaunchObj = jest.spyOn(reporterUtils, 'getStartLaunchObj');
+    });
 
-    expect(spyGetStartLaunchObj).toHaveBeenCalledWith(launchObj);
-    // @ts-ignore access to the class private property
-    expect(reporter.client.startLaunch).toHaveBeenCalledWith(launchObj);
+    test('invokes getStartLaunchObj method to receive object to correctly start launch', function () {
+      const launchObj: StartLaunchRQ = {
+        description: 'Launch description',
+        attributes: [{ key: 'example', value: 'true' }],
+      };
+
+      reporter.startLaunch(launchObj);
+
+      expect(spyGetStartLaunchObj).toHaveBeenCalledWith(launchObj);
+    });
+
+    test('should start launch by calling the ReportPortal client startLaunch method', function () {
+      const launchObj: StartLaunchRQ = {
+        description: 'Launch description',
+        attributes: [{ key: 'example', value: 'true' }],
+      };
+      spyGetStartLaunchObj.mockReturnValueOnce(launchObj);
+
+      reporter.startLaunch(launchObj);
+
+      // @ts-ignore access to the class private property
+      expect(reporter.client.startLaunch).toHaveBeenCalledWith(launchObj);
+    });
   });
 
   test('finishLaunch: should finish launch by calling the ReportPortal client finishLaunch method', function () {

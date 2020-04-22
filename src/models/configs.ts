@@ -15,20 +15,24 @@
  *
  */
 
-import { Attribute } from "./common";
+import { Attribute } from './common';
+import { LAUNCH_MODES } from '../constants';
 
 export interface ReportPortalConfig {
-    token: string;
-    project: string;
-    endpoint: string;
-    launch: string;
+  token: string;
+  project: string;
+  endpoint: string;
+  launch: string;
 
-    debug?: boolean;
-    attributes?: Array<Attribute>;
-    description?: string;
-    isLaunchMergeRequired?: boolean;
+  debug?: boolean;
+  attributes?: Array<Attribute>;
+  description?: string;
+  rerun?: boolean;
+  rerunOf?: string;
+  mode?: LAUNCH_MODES;
+  isLaunchMergeRequired?: boolean;
 }
 
 export interface AgentOptions {
-    parallelRun?: boolean;
+  parallelRun?: boolean;
 }

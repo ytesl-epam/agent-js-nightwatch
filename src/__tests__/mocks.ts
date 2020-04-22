@@ -15,9 +15,13 @@
  *
  */
 
-import { ReportPortalConfig, AgentOptions } from '../models';
+import {
+  ReportPortalConfig,
+  AgentOptions,
+  StorageTestItem,
+} from '../models';
 
-export const getDefaultMockConfig = (): ReportPortalConfig & AgentOptions => ({
+export const getDefaultMockConfig = (): ReportPortalConfig => ({
   token: '00000000-0000-0000-0000-000000000000',
   endpoint: 'https://reportportal.server/api/v1',
   project: 'ProjectName',
@@ -26,12 +30,18 @@ export const getDefaultMockConfig = (): ReportPortalConfig & AgentOptions => ({
   attributes: [],
 });
 
-export class RPClientMock {
-  private config: ReportPortalConfig & AgentOptions;
+export const getStorageTestItemMock = (name: string): StorageTestItem => ({
+  id: 'tempTestItemId',
+  name,
+  attributes: [],
+  description: '',
+});
 
-  constructor(config?: ReportPortalConfig & AgentOptions) {
+export class RPClientMock {
+  private config: ReportPortalConfig;
+
+  constructor(config?: ReportPortalConfig) {
     this.config = config || getDefaultMockConfig();
-    console.log('Mock called');
   }
 
   public startLaunch = jest.fn().mockReturnValue({
@@ -55,4 +65,22 @@ export class RPClientMock {
   public sendLog = jest.fn().mockReturnValue({
     promise: Promise.resolve('ok'),
   });
+}
+
+export class StorageMock {
+  private testItems: Array<StorageTestItem>;
+
+  public getAllItems = jest.fn();
+
+  public getLastItem = jest.fn();
+
+  public getItemByName = jest.fn();
+
+  public getItemById = jest.fn();
+
+  public getCurrentItem = jest.fn();
+
+  public addTestItem = jest.fn();
+
+  public removeItemById = jest.fn();
 }
