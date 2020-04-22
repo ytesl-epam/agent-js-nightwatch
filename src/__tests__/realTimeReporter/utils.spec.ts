@@ -25,7 +25,7 @@ import {
   getCodeRef,
 } from '../../realTimeReporter/utils';
 import * as utils from '../../realTimeReporter/utils';
-import { DEFAULT_FILE_TYPE } from '../../constants';
+import {DEFAULT_FILE_TYPE, STATUSES} from '../../constants';
 import * as commonUtils from "../../utils";
 
 describe('setDefaultFileType', function() {
@@ -174,3 +174,70 @@ describe('getCodeRef', function() {
     expect(spyBuildCodeRef).toBeCalledWith('C:/project/file.js', 'testItem');
   });
 });
+
+describe('calculateTestItemStatus', function() {
+  const calculateTestItemStatus = utils.calculateTestItemStatus;
+
+  test('should return object with SKIPPED status in case of skipped counter not zero in testResult', function () {
+    const testResult: any = {
+      name: 'testItem',
+      results: {
+        testcases: {
+          'testItem': {
+            passed: 1,
+            skipped: 2,
+            failed: 1,
+          }
+        }
+      }
+    };
+
+    const itemInfo = calculateTestItemStatus(testResult);
+
+    expect(itemInfo.status).toBe(STATUSES.SKIPPED);
+    expect(itemInfo.assertionsMessage).toBe(null);
+  });
+
+  test('should return object with FAILED status and corresponding assertionsMessage in case of failed counter not zero in testResult', function () {
+    const testResult: any = {
+      name: 'testItem',
+      results: {
+        testcases: {
+          'testItem': {
+            passed: 1,
+            skipped: 0,
+            failed: 2,
+            assertions: [{ fullMsg: 'Error', stackTrace: 'from launchController' }],
+          }
+        }
+      }
+    };
+
+    const itemInfo = calculateTestItemStatus(testResult);
+
+    expect(itemInfo.status).toBe(STATUSES.FAILED);
+    expect(itemInfo.assertionsMessage).toBe(`Error
+from launchController`);
+  });
+
+  test('should return object with PASSED status in case of no skipped and failed items', function () {
+    const testResult: any = {
+      name: 'testItem',
+      results: {
+        testcases: {
+          'testItem': {
+            passed: 2,
+            skipped: 0,
+            failed: 0,
+          }
+        }
+      }
+    };
+
+    const itemInfo = calculateTestItemStatus(testResult);
+
+    expect(itemInfo.status).toBe(STATUSES.PASSED);
+    expect(itemInfo.assertionsMessage).toBe(null);
+  });
+});
+

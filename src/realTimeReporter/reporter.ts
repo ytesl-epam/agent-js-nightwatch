@@ -73,7 +73,7 @@ export default class Reporter {
       };
     }
 
-    const { status, assertionsMessage } = calculateTestItemStatus(testResult.results);
+    const { status, assertionsMessage } = calculateTestItemStatus(testResult);
 
     if (status === STATUSES.FAILED) {
       const itemLog: LogRQ = {
