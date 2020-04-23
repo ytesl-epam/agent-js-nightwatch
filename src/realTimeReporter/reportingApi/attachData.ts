@@ -45,32 +45,36 @@ export interface AttachDataInterface {
 }
 
 export const attachData: AttachDataInterface = {
-    addAttributes: PublicReportingAPI.addAttributes,
-    setDescription: PublicReportingAPI.setDescription,
+    addAttributes(attributes, suite) {
+      PublicReportingAPI.addAttributes(attributes, suite);
+    },
+    setDescription(text: string, suite?: string) {
+      PublicReportingAPI.setDescription(text, suite);
+    },
 
-    log(level, message = '', file = null, suite?: string) {
+    log(level, message, file = null, suite) {
         PublicReportingAPI.addLog({ level, message, file }, suite);
     },
-    launchLog(level, message = '', file) {
+    launchLog(level, message, file) {
         PublicReportingAPI.addLaunchLog({ level, message, file });
     },
 
-    logInfo(message, file = null, suite?: string) {
+    logInfo(message, file = null, suite) {
         PublicReportingAPI.addLog({ level: LOG_LEVELS.INFO, message, file }, suite);
     },
-    logDebug(message, file = null, suite?: string) {
+    logDebug(message, file = null, suite) {
         PublicReportingAPI.addLog({ level: LOG_LEVELS.DEBUG, message, file }, suite);
     },
-    logWarn(message, file = null, suite?: string) {
+    logWarn(message, file = null, suite) {
         PublicReportingAPI.addLog({ level: LOG_LEVELS.WARN, message, file }, suite);
     },
-    logError(message, file = null, suite?: string) {
+    logError(message, file = null, suite) {
         PublicReportingAPI.addLog({ level: LOG_LEVELS.ERROR, message, file }, suite);
     },
-    logTrace(message, file = null, suite?: string) {
+    logTrace(message, file = null, suite) {
         PublicReportingAPI.addLog({ level: LOG_LEVELS.TRACE, message, file }, suite);
     },
-    logFatal(message, file = null, suite?: string) {
+    logFatal(message, file = null, suite) {
         PublicReportingAPI.addLog({ level: LOG_LEVELS.FATAL, message, file }, suite);
     },
 
