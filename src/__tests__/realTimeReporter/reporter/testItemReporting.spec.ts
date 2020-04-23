@@ -16,14 +16,14 @@
  */
 
 import { StartTestItemRQ, StorageTestItem } from '../../../models';
-import {RealTimeReporter} from '../../../realTimeReporter';
+import { RealTimeReporter } from '../../../realTimeReporter';
 import {
   getDefaultMockConfig,
   getStorageTestItemMock,
   RPClientMock,
   StorageMock,
 } from '../../mocks';
-import { STATUSES, TEST_ITEM_TYPES } from "../../../constants";
+import { STATUSES, TEST_ITEM_TYPES } from '../../../constants';
 
 const TEST_ITEM_START_RQ_EXAMPLE: StartTestItemRQ = {
   name: 'mock_test_item',

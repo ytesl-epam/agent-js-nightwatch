@@ -185,8 +185,8 @@ describe('calculateTestItemStatus', function() {
         testcases: {
           'testItem': {
             passed: 1,
-            skipped: 2,
-            failed: 1,
+            skipped: 1,
+            failed: 0,
           }
         }
       }
@@ -206,7 +206,7 @@ describe('calculateTestItemStatus', function() {
           'testItem': {
             passed: 1,
             skipped: 0,
-            failed: 2,
+            failed: 1,
             assertions: [{ fullMsg: 'Error', stackTrace: 'from launchController' }],
           }
         }

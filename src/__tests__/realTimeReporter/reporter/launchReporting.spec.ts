@@ -71,14 +71,26 @@ describe('launchReporting', function() {
     });
   });
 
-  test('finishLaunch: should finish launch by calling the ReportPortal client finishLaunch method', function () {
-    // @ts-ignore access to the class private property
-    reporter.launchId = 'tempLaunchId';
-    const launchObj = { attributes: [{ key: 'test' }] };
+  describe('finishLaunch', function () {
+    beforeEach(() => {
+      // @ts-ignore access to the class private property
+      reporter.launchId = 'tempLaunchId';
+    });
 
-    reporter.finishLaunch(launchObj);
+    test('should finish launch with empty finish object in case of empty arguments', function () {
+      reporter.finishLaunch();
 
-    // @ts-ignore access to the class private property
-    expect(reporter.client.finishLaunch).toHaveBeenCalledWith('tempLaunchId', launchObj);
+      // @ts-ignore access to the class private property
+      expect(reporter.client.finishLaunch).toHaveBeenCalledWith('tempLaunchId', {});
+    });
+
+    test('should finish launch by calling the ReportPortal client finishLaunch method', function () {
+      const launchObj = { attributes: [{ key: 'test' }] };
+
+      reporter.finishLaunch(launchObj);
+
+      // @ts-ignore access to the class private property
+      expect(reporter.client.finishLaunch).toHaveBeenCalledWith('tempLaunchId', launchObj);
+    });
   });
 });
