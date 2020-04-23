@@ -25,7 +25,7 @@ import {
   getCodeRef,
 } from '../../realTimeReporter/utils';
 import * as utils from '../../realTimeReporter/utils';
-import {DEFAULT_FILE_TYPE, STATUSES} from '../../constants';
+import { DEFAULT_FILE_TYPE, STATUSES } from '../../constants';
 import * as commonUtils from "../../utils";
 
 describe('setDefaultFileType', function() {
@@ -41,7 +41,7 @@ describe('setDefaultFileType', function() {
     expect(setDefaultFileType()).toBe(undefined);
   });
 
-  test('should leave received file type if it exists undefined in the file parameter', function () {
+  test('should leave received file type if it exists in the file parameter', function () {
     const updatedFile = setDefaultFileType({ name: 'file', type: 'application/json', content: 'string' });
 
     expect(updatedFile.type).toBe('application/json');

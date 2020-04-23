@@ -192,7 +192,4 @@ describe('testItemReporting', function () {
       expect(storageItem).toEqual(updatedStorageItem);
     });
   });
-
 });
-
-
