@@ -40,7 +40,9 @@ describe('Storage', function() {
     test('should create the storage with initial items', function () {
       const storage = new Storage([initialItem]);
 
-      expect(storage.getAllItems()).toEqual([initialItem]);
+      const allStorageItems = storage.getAllItems();
+
+      expect(allStorageItems).toEqual([initialItem]);
     });
 
     test('should create the empty storage in case of empty constructor params', function () {

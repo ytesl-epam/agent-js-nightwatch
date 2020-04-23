@@ -163,7 +163,6 @@ describe('attachData', function () {
     });
   });
 
-
   describe('launch log functions', function () {
     let spyClientAddLaunchLog: jest.SpyInstance;
 
