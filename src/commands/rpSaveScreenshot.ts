@@ -24,7 +24,7 @@ export const command = function (fileName: string, callback: screenshotCallbackT
     return this.saveScreenshot(fileName, (data: ScreenshotDataInterface) => {
         const type = getFileMimeType(fileName);
 
-        PublicReportingAPI.logInfo('Screenshot', {
+        PublicReportingAPI.logInfo(fileName, {
             name: fileName,
             type,
             content: data.value,
