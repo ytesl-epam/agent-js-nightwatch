@@ -18,44 +18,49 @@
 import { STATUSES } from '../constants';
 
 export interface Attribute {
-    value: string;
-    key?: string;
-    system?: boolean;
+  value: string;
+  key?: string;
+  system?: boolean;
 }
 
 export interface Parameter {
-    key: string;
-    value: string;
+  key: string;
+  value: string;
 }
 
 interface ExternalSystemIssue {
-    url: string;
-    btsProject: string,
-    btsUrl: string,
-    ticketId: string,
+  url: string;
+  btsProject: string,
+  btsUrl: string,
+  ticketId: string,
 
-    submitDate?: number,
+  submitDate?: number,
 }
 
 export interface Issue {
-    issueType: string
+  issueType: string
 
-    autoAnalyzed?: boolean,
-    ignoreAnalyzer?: boolean,
-    comment?: string,
-    externalSystemIssues?: Array<ExternalSystemIssue>;
+  autoAnalyzed?: boolean,
+  ignoreAnalyzer?: boolean,
+  comment?: string,
+  externalSystemIssues?: Array<ExternalSystemIssue>;
 }
 
 interface RPItem {
-    attributes?: Array<Attribute>,
-    description?: string,
+  attributes?: Array<Attribute>,
+  description?: string,
 }
 
 export interface RPItemStartRQ extends RPItem {
-    startTime?: Date;
+  startTime?: Date;
 }
 
 export interface RPItemFinishRQ extends RPItem {
-    status: STATUSES;
-    endTime?: Date;
+  status: STATUSES;
+  endTime?: Date;
+}
+
+export interface StorageTestItem extends RPItem {
+  id: string;
+  name: string;
 }

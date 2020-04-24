@@ -18,9 +18,8 @@
 import RPClient from 'reportportal-client';
 // @ts-ignore
 import { EVENTS as CLIENT_EVENTS } from 'reportportal-client/lib/events';
-import { getLastItem, getAgentInfo } from '../utils';
+import { getAgentInfo } from '../utils';
 import { EVENTS, LOG_LEVELS, STATUSES } from '../constants';
-import { getStartLaunchObj, setDefaultFileType, subscribeToEvent } from './utils';
 import {
   Attribute,
   FinishTestItemRQ,
@@ -28,87 +27,65 @@ import {
   ReportPortalConfig,
   StartLaunchRQ,
   StartTestItemRQ,
+  StorageTestItem,
 } from '../models';
-
-interface TestItem {
-  id: string;
-  name: string;
-  attributes?: Array<Attribute>;
-  description?: string;
-}
+import {
+  getStartLaunchObj,
+  setDefaultFileType,
+  subscribeToEvent,
+  calculateTestItemStatus,
+} from './utils';
+import { Storage } from './storage';
 
 export default class Reporter {
   private client: RPClient;
   private launchId: string;
-  private testItems: Array<TestItem>; // TODO: move it to the store in the future
+  private storage: Storage;
+  private config: ReportPortalConfig;
 
   constructor(config: ReportPortalConfig) {
     this.registerEventListeners();
 
     const agentInfo = getAgentInfo();
 
+    this.config = config;
     this.client = new RPClient(config, agentInfo);
-    this.testItems = [];
+    this.storage = new Storage();
   }
 
   private registerEventListeners(): void {
-    subscribeToEvent(EVENTS.START_TEST_ITEM, this.startTestItem.bind(this));
-    subscribeToEvent(EVENTS.FINISH_TEST_ITEM, this.finishTestItem.bind(this));
+    subscribeToEvent(EVENTS.START_TEST_ITEM, this.startTestItem);
+    subscribeToEvent(EVENTS.FINISH_TEST_ITEM, this.finishTestItem);
 
-    subscribeToEvent(CLIENT_EVENTS.ADD_LOG, this.sendLogToItem.bind(this));
-    subscribeToEvent(CLIENT_EVENTS.ADD_LAUNCH_LOG, this.sendLogToLaunch.bind(this));
-    subscribeToEvent(CLIENT_EVENTS.ADD_ATTRIBUTES, this.addItemAttributes.bind(this));
-    subscribeToEvent(CLIENT_EVENTS.SET_DESCRIPTION, this.setItemDescription.bind(this));
+    subscribeToEvent(CLIENT_EVENTS.ADD_LOG, this.sendLogToItem);
+    subscribeToEvent(CLIENT_EVENTS.ADD_LAUNCH_LOG, this.sendLogToLaunch);
+    subscribeToEvent(CLIENT_EVENTS.ADD_ATTRIBUTES, this.addItemAttributes);
+    subscribeToEvent(CLIENT_EVENTS.SET_DESCRIPTION, this.setItemDescription);
   };
 
-  private getLastItem(): TestItem {
-    return getLastItem(this.testItems);
-  };
+  private getFinishItemObj(testResult: any, storageItem: StorageTestItem): FinishTestItemRQ {
+    const { id, ...data } = storageItem;
 
-  private getTestItemByName(itemName: string): TestItem {
-    const testItem = this.testItems.find((item) => item.name === itemName);
-
-    return testItem || null;
-  };
-
-  private getCurrentItem(itemName: string): TestItem {
-    const itemByName = this.getTestItemByName(itemName);
-
-    return itemByName || this.getLastItem();
-  }
-
-  private removeItemById(id: string): void {
-    this.testItems = this.testItems.filter((item) => item.id !== id);
-  }
-
-  private getItemDataObj(testResult: any, id: string): FinishTestItemRQ {
     if (!testResult || !testResult.results) {
       return {
+        ...data,
         status: STATUSES.PASSED,
       };
     }
 
-    const currentTestItemResults = testResult.results.testcases[testResult.name];
-    let status;
+    const { status, assertionsMessage } = calculateTestItemStatus(testResult);
 
-    if (currentTestItemResults.skipped !== 0) {
-      status = STATUSES.SKIPPED;
-    } else if (currentTestItemResults.failed !== 0) {
-      status = STATUSES.FAILED;
-      const assertionsResult = currentTestItemResults.assertions[0];
-
+    if (status === STATUSES.FAILED) {
       const itemLog: LogRQ = {
         level: LOG_LEVELS.ERROR,
-        message: `${assertionsResult.fullMsg}
-${assertionsResult.stackTrace}`,
+        message: assertionsMessage,
       };
 
       this.client.sendLog(id, itemLog);
-    } else {
-      status = STATUSES.PASSED;
     }
 
     return {
+      ...data,
       status,
     };
   };
@@ -123,53 +100,53 @@ ${assertionsResult.stackTrace}`,
     this.client.finishLaunch(this.launchId, launchFinishObj);
   };
 
-  private startTestItem(startTestItemObj: StartTestItemRQ): void {
-    const parentItem = this.getCurrentItem(startTestItemObj.parentName);
+  private startTestItem = (startTestItemObj: StartTestItemRQ): void => {
+    const parentItem = this.storage.getCurrentItem(startTestItemObj.parentName);
     const parentId = parentItem ? parentItem.id : undefined;
     const itemObj = this.client.startTestItem(startTestItemObj, this.launchId, parentId);
 
-    const testItem: TestItem = {
+    const testItem: StorageTestItem = {
       id: itemObj.tempId,
       name: startTestItemObj.name,
       attributes: [],
-      description: startTestItemObj.description || '',
+      description: '',
     };
 
-    this.testItems.push(testItem);
+    this.storage.addTestItem(testItem);
   };
 
-  private finishTestItem(testResult: any): void {
-    const { id, ...data } = this.getTestItemByName(testResult.name);
-    const finishTestItemObj = this.getItemDataObj(testResult, id);
-    const finishItemObj = { ...data, ...finishTestItemObj };
+  private finishTestItem = (testResult: any): void => {
+    const storageItem = this.storage.getCurrentItem(testResult.name);
+    const finishTestItemObj = this.getFinishItemObj(testResult, storageItem);
 
-    this.removeItemById(id);
-    this.client.finishTestItem(id, finishItemObj);
+    this.client.finishTestItem(storageItem.id, finishTestItemObj);
+
+    this.storage.removeItemById(storageItem.id);
   };
 
-  private sendLogToItem(data: { log: LogRQ; suite?: string }): void {
+  private sendLogToItem = (data: { log: LogRQ; suite?: string }): void => {
     const { log: { file, ...log }, suite: suiteName } = data;
-    const currentItem = this.getCurrentItem(suiteName);
+    const currentItem = this.storage.getCurrentItem(suiteName);
     const fileToSend = setDefaultFileType(file);
 
     this.client.sendLog(currentItem.id, log, fileToSend);
   };
 
-  private sendLogToLaunch(data: LogRQ): void {
+  private sendLogToLaunch = (data: LogRQ): void => {
     const { file, ...log } = data;
     const fileToSend = setDefaultFileType(file);
 
     this.client.sendLog(this.launchId, log, fileToSend);
-  }
+  };
 
-  private addItemAttributes(data: { attributes: Array<Attribute>, suite?: string }): void {
-    const currentItem = this.getCurrentItem(data.suite);
+  private addItemAttributes = (data: { attributes: Array<Attribute>, suite?: string }): void => {
+    const currentItem = this.storage.getCurrentItem(data.suite);
 
     currentItem.attributes = currentItem.attributes.concat(data.attributes);
   };
 
-  private setItemDescription(data: { text: string, suite?: string }): void {
-    const currentItem = this.getCurrentItem(data.suite);
+  private setItemDescription = (data: { text: string, suite?: string }): void => {
+    const currentItem = this.storage.getCurrentItem(data.suite);
 
     currentItem.description = data.text;
   };

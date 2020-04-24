@@ -16,7 +16,7 @@
  */
 
 import { getFileMimeType } from '../utils';
-import { screenshotCallbackType, ScreenshotDataInterface } from '../models/commands';
+import { screenshotCallbackType, ScreenshotDataInterface } from '../models/nightwatch';
 import { PublicReportingAPI } from '../realTimeReporter';
 
 // More about custom commands in Nightwatch - https://nightwatchjs.org/guide/extending-nightwatch/#writing-custom-commands
@@ -24,7 +24,7 @@ export const command = function (fileName: string, callback: screenshotCallbackT
     return this.saveScreenshot(fileName, (data: ScreenshotDataInterface) => {
         const type = getFileMimeType(fileName);
 
-        PublicReportingAPI.logInfo('Screenshot', {
+        PublicReportingAPI.logInfo(fileName, {
             name: fileName,
             type,
             content: data.value,
