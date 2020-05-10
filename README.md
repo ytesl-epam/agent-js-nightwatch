@@ -48,8 +48,8 @@ Create rp.json file with reportportal configuration:
 ##Reporting
 
 **This agent supports two types of reporting:**
-* Real-time reporting
 * Post-factum reporting
+* Real-time reporting
 
 ###Post-factum  reporting
 
@@ -88,41 +88,108 @@ This reporter sends results of test executions to Report Portal **during tests r
 
 Since Nightwatch does not initially support real-time test report results, this approach requires a bit more preparation.
 
+Since tests in nightwatch can be run sequentially or in parallel, each of the execution methods requires its own small preparation steps.
+
+Each run type supports the Reporting API to use it directly in tests.
+
+####Default run
+
 1. Create the `nightwatch.conf.js` configuration file.
 
 2. Create the `reporter` instance like:
     ```javascript
-    const { RealTimeReporter } = require('@reportportal/agent-js-nightwatch');
+    const { RealTimeReporter, ReportingAPI } = require('@reportportal/agent-js-nightwatch');
     const config = require('./rp.json');
     const rpReporter = new RealTimeReporter(config);
     ```
 
-3. Add global `before` and `after` hook handlers to start and finish launch:
+3. Add global `before` and `after` hook handlers:<br/>
+Start and finish launch here.<br/>
+Also to use Reporting API it must be initialized in `before` hook and destroyed in `after` hook.
     ```javascript
     module.exports = {
        // ...yourConfig,
        globals: {
           before: function (done) {
-               const launchParams = {
-                   description: 'Awesome launch',
-                   attributes: [{ key: 'status', value: 'passed' }],
-               };
-                
-               rpReporter.startLaunch(launchParams);
-               done();
+             ReportingAPI.init();
+
+             const launchParams = { // launch params from rp.json can be overwritten here
+                 description: 'Awesome launch',
+                 attributes: [{ key: 'status', value: 'passed' }],
+             };
+             
+             rpReporter.startLaunch(launchParams);
+             done();
           },
                     
           after: function (done) {
-              rpReporter.finishLaunch();
-              done();
+             rpReporter.finishLaunch();
+          
+             ReportingAPI.destroy();
+             done();
           },  
        }
        
     }
     
     ```
+4. Now you able to use agent API in tests to report results in real time (see the API reference).<br/>
+No other preparations are required from the test definitions.
+
+####Parallel run
+
+1. Create the `nightwatch.conf.js` configuration file.
+
+2. Add global `before` and `after` hook handlers:<br/>
+Start and finish launch here.<br/>
+Also you create `rpReporter` instance inside the `before` hook body, because the reporter must be created **ONLY ONCE** for the main process.
+    ```javascript
+    const { RealTimeReporter } = require('@reportportal/agent-js-nightwatch');
+    const config = require('./rp.json');
+    let rpReporter;
+ 
+    module.exports = {
+       // ...yourConfig,
+       globals: {
+          before: function (done) {
+             rpReporter = new RealTimeReporter(config);
+
+             const launchParams = { // launch params from rp.json can be overwritten here
+                 description: 'Awesome launch',
+                 attributes: [{ key: 'status', value: 'passed' }],
+             };
+             
+             rpReporter.startLaunch(launchParams);
+             done();
+          },
+                    
+          after: function (done) {
+             rpReporter.finishLaunch();
+             done();
+          },  
+       }
+       
+    }
     
-4. Now you able to use agent API in your tests to report results in real time (see the API reference).
+    ```
+
+3. To start using the Reporting API in tests, you must initialize and destroy the API in **EACH** test suite:
+    ```javascript
+    const { ReportingAPI } = require('@reportportal/agent-js-nightwatch');
+    ReportingAPI.init();
+    
+    describe('Suite name', function() {
+    
+      after((browser, done) => {
+        browser.end(() => {
+          ReportingAPI.destroy();
+          done();
+        });
+      });
+    });
+    ```
+    
+4. Now you able to use agent API in tests to report results in real time (see the API reference).
     
 ####Reporting API
 
