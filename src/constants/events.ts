@@ -16,11 +16,12 @@
  */
 
 export enum EVENTS {
-    START_TEST_ITEM = 'rp:startTestItem',
-    FINISH_TEST_ITEM = 'rp:finishTestItem',
-    ADD_LOG = 'rp:addLog',
-    ADD_LAUNCH_LOG = 'rp:addLaunchLog',
-    ADD_ATTRIBUTES = 'rp:addAttributes',
-    ADD_DESCRIPTION = 'rp:addDescription',
-    SET_TEST_CASE_ID = 'rp:setTestCaseId',
+  START_TEST_ITEM = 'rp:startTestItem',
+  FINISH_TEST_ITEM = 'rp:finishTestItem',
+  ADD_LOG = 'rp:addLog',
+  ADD_LAUNCH_LOG = 'rp:addLaunchLog',
+  ADD_ATTRIBUTES = 'rp:addAttributes',
+  ADD_DESCRIPTION = 'rp:addDescription',
+  SET_TEST_CASE_ID = 'rp:setTestCaseId',
+  SET_STATUS = 'rp:setStatus',
 }

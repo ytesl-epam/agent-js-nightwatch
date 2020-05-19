@@ -15,7 +15,7 @@
  *
  */
 
-import { LOG_LEVELS, EVENTS } from '../../constants';
+import { LOG_LEVELS, EVENTS, STATUSES } from '../../constants';
 import { publishIPCEvent as publishEvent } from '../ipc/client';
 import { Attribute, LogRQ, Attachment } from '../../models';
 
@@ -25,6 +25,7 @@ export interface AttachDataInterface {
   addAttributes(attributes: Array<Attribute>, itemName?: string): void;
   addDescription(text: string, itemName?: string): void;
   setTestCaseId(id: string, itemName?: string): void;
+  setStatus(status: STATUSES, itemName?: string): void;
 
   log(level: LOG_LEVELS, message: LogMessage, file?: Attachment, itemName?: string): void;
   launchLog(level: LOG_LEVELS, message: LogMessage, file?: Attachment): void;
@@ -42,6 +43,15 @@ export interface AttachDataInterface {
   launchLogError(message: LogMessage, file?: Attachment): void;
   launchLogTrace(message: LogMessage, file?: Attachment): void;
   launchLogFatal(message: LogMessage, file?: Attachment): void;
+
+  setStatusFailed(itemName?: string): void;
+  setStatusPassed(itemName?: string): void;
+  setStatusSkipped(itemName?: string): void;
+  setStatusStopped(itemName?: string): void;
+  setStatusInterrupted(itemName?: string): void;
+  setStatusCancelled(itemName?: string): void;
+  setStatusInfo(itemName?: string): void;
+  setStatusWarn(itemName?: string): void;
 }
 
 export const attachData: AttachDataInterface = {
@@ -53,6 +63,9 @@ export const attachData: AttachDataInterface = {
   },
   setTestCaseId(id, itemName) {
     publishEvent(EVENTS.SET_TEST_CASE_ID, { id, itemName });
+  },
+  setStatus(status, itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status, itemName });
   },
 
   log(level, message, file, itemName) {
@@ -140,5 +153,30 @@ export const attachData: AttachDataInterface = {
   },
   launchLogFatal(message, file) {
     publishEvent(EVENTS.ADD_LAUNCH_LOG, { level: LOG_LEVELS.FATAL, message, file });
+  },
+
+  setStatusFailed(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.FAILED, itemName });
+  },
+  setStatusPassed(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.PASSED, itemName });
+  },
+  setStatusSkipped(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.SKIPPED, itemName });
+  },
+  setStatusStopped(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.STOPPED, itemName });
+  },
+  setStatusInterrupted(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.INTERRUPTED, itemName });
+  },
+  setStatusCancelled(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.CANCELLED, itemName });
+  },
+  setStatusInfo(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.INFO, itemName });
+  },
+  setStatusWarn(itemName) {
+    publishEvent(EVENTS.SET_STATUS, { status: STATUSES.WARN, itemName });
   },
 };

@@ -60,6 +60,7 @@ module.exports = {
     PublicReportingAPI.logInfo('Info log for demo test item', null, browser.currentTest.name);
     PublicReportingAPI.launchLogDebug('Debug log for launch');
     PublicReportingAPI.addDescription('Demo test for google.com', browser.currentTest.name);
+    PublicReportingAPI.setStatusWarn(browser.currentTest.name);
   },
 
   'part two' : function(browser) {
