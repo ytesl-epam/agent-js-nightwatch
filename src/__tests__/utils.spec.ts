@@ -83,9 +83,6 @@ describe('buildCodeRef', function() {
 
   beforeAll(() => {
     jest.spyOn(process, 'cwd').mockImplementation(() => root);
-    jest.mock('path', () => ({
-      sep: '\\',
-    }));
   });
 
   afterAll(() => {
@@ -93,13 +90,13 @@ describe('buildCodeRef', function() {
   });
 
   test('should return formatted code ref from testPath', function () {
-    const codeRef = buildCodeRef(`${root}\\dir\\fileName.ts`);
+    const codeRef = buildCodeRef(`${root}${path.sep}dir\\fileName.ts`);
 
     expect(codeRef).toBe('dir/fileName.ts');
   });
 
   test('should return formatted code ref from testPath and testName', function () {
-    const codeRef = buildCodeRef(`${root}\\dir\\fileName.ts`, 'awesomeTest');
+    const codeRef = buildCodeRef(`${root}${path.sep}dir\\fileName.ts`, 'awesomeTest');
 
     expect(codeRef).toBe('dir/fileName.ts/awesomeTest');
   });

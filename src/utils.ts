@@ -24,34 +24,34 @@ import { Attribute } from './models';
 export const getLastItem = (items: any[] = []): any => items[items.length - 1];
 
 export const getFileMimeType = (fileName: string): string => {
-    const matches = fileName.match(/\.([^.]*)$/);
-    let type;
+  const matches = fileName.match(/\.([^.]*)$/);
+  let type;
 
-    if (matches) {
-        // @ts-ignore
-        type = FILE_TYPES[matches[1].toUpperCase()];
-    }
+  if (matches) {
+      // @ts-ignore
+      type = FILE_TYPES[matches[1].toUpperCase()];
+  }
 
-    return type || DEFAULT_FILE_TYPE;
+  return type || DEFAULT_FILE_TYPE;
 };
 
 export const getAgentInfo = () => ({
-    version: pjsonVersion,
-    name: pjsonName,
+  version: pjsonVersion,
+  name: pjsonName,
 });
 
 export const getSystemAttributes = (): Array<Attribute> => ([{
-    key: 'agent',
-    value: `${pjsonName}|${pjsonVersion}`,
-    system: true,
+  key: 'agent',
+  value: `${pjsonName}|${pjsonVersion}`,
+  system: true,
 }]);
 
 export const buildCodeRef = (testPath: string, itemName: string = ''): string => {
-    const workingDir = process.cwd();
+  const workingDir = process.cwd();
 
-    const codeRef = testPath
-        .replace(`${workingDir}${path.sep}`, '')
-        .replace(/\\/g, '/');
+  const codeRef = testPath
+      .replace(`${workingDir}${path.sep}`, '')
+      .replace(/\\/g, '/');
 
-    return itemName ? `${codeRef}/${itemName}` : codeRef;
+  return itemName ? `${codeRef}/${itemName}` : codeRef;
 };
