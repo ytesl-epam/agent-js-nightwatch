@@ -20,7 +20,7 @@ import { RealTimeReporter } from '../../../realTimeReporter';
 import { getDefaultMockConfig, getStorageTestItemMock, RPClientMock, StorageMock } from '../../mocks';
 import * as utils from '../../../realTimeReporter/utils';
 import * as IPCServer from '../../../realTimeReporter/ipc/server';
-import { FILE_TYPES, LOG_LEVELS } from '../../../constants';
+import { FILE_TYPES, LOG_LEVELS, STATUSES } from '../../../constants';
 
 describe('testItemReporting', function () {
   jest.spyOn(IPCServer, 'startIPCServer')
@@ -228,6 +228,38 @@ describe('testItemReporting', function () {
 
       const updatedStorageItem: StorageTestItem = getStorageTestItemMock('testItem');
       updatedStorageItem.testCaseId = data.id;
+
+      expect(storageItem).toEqual(updatedStorageItem);
+    });
+  });
+
+  describe('setStatusToItem', function () {
+    const data: { status: STATUSES, itemName?: string } = {
+      status: STATUSES.PASSED,
+      itemName: 'itemName',
+    };
+
+    let storageItem: StorageTestItem;
+    let spyGetCurrentItem: jest.SpyInstance;
+
+    beforeEach(() => {
+      storageItem = getStorageTestItemMock('testItem');
+      spyGetCurrentItem = jest.spyOn(storage, 'getCurrentItem').mockReturnValue(storageItem);
+    });
+
+    test('invokes the storage getCurrentItem method with item name to get item from storage', function () {
+      // @ts-ignore access to the class private property
+      reporter.setStatusToItem(data);
+
+      expect(spyGetCurrentItem).toHaveBeenCalledWith(data.itemName);
+    });
+
+    test('should set status for item in storage', function () {
+      // @ts-ignore access to the class private property
+      reporter.setStatusToItem(data);
+
+      const updatedStorageItem: StorageTestItem = getStorageTestItemMock('testItem');
+      updatedStorageItem.status = data.status;
 
       expect(storageItem).toEqual(updatedStorageItem);
     });
