@@ -70,9 +70,13 @@ export default class Reporter {
 
   private getFinishItemObj(testResult: any, storageItem: StorageTestItem): FinishTestItemRQ {
     const { id, ...data } = storageItem;
+    const { name, ...resultData } = testResult;
 
-    if (!testResult || !testResult.results) {
-      return data;
+    if (!testResult.results) {
+      return {
+        ...data,
+        ...resultData,
+      };
     }
 
     const { status, assertionsMessage } = calculateTestItemStatus(testResult);

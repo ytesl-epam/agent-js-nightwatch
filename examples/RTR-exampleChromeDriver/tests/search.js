@@ -42,7 +42,6 @@ module.exports = {
     PublicReportingAPI.launchLogDebug('Debug log for launch');
     PublicReportingAPI.addDescription('Demo test for google.com');
     PublicReportingAPI.setTestCaseId('itemTestCaseId');
-    PublicReportingAPI.setStatusInfo();
   },
 
   'searching nightwatch' : function(browser) {
@@ -60,5 +59,6 @@ module.exports = {
     };
 
     PublicReportingAPI.launchLogInfo('Log with attachment for launch', attachment);
+    PublicReportingAPI.setStatusPassed();
   }
 };
