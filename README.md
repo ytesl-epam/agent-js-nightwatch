@@ -75,11 +75,15 @@ This reporter sends results of test executions to Report Portal when **all tests
     nightwatch --config ./nightwatch.conf.js --reporter ./reporter.js
     ```
 
-####Example
-
 To run example:
+With unit tests:
 ```cmd
-cd @reportportal/agent-js-nightwatch && npm run example:postFactumReporter
+cd @reportportal/agent-js-nightwatch && npm run example:postFactumReporter:unitTests
+```
+
+With chromeDriver:
+```cmd
+cd @reportportal/agent-js-nightwatch && npm run example:postFactumReporter:chromeDriver
 ```
 
 ###Real-time reporting
@@ -108,7 +112,7 @@ Start and finish launch here.<br/>
 Also to use Reporting API it must be initialized in `before` hook and destroyed in `after` hook.
     ```javascript
     module.exports = {
-       // ...yourConfig,
+       // ...your config,
        globals: {
           before: function (done) {
              ReportingAPI.init();
@@ -136,6 +140,12 @@ Also to use Reporting API it must be initialized in `before` hook and destroyed 
 4. Now you able to use agent API in tests to report results in real time (see the API reference).<br/>
 No other preparations are required from the test definitions.
 
+  
+To run example:
+```cmd
+cd @reportportal/agent-js-nightwatch && npm run example:realTimeReporter:chromeDriver
+```
+
 ####Parallel run
 
 1. Create the `nightwatch.conf.js` configuration file.
@@ -149,7 +159,7 @@ Also you create `rpReporter` instance inside the `before` hook body, because the
     let rpReporter;
  
     module.exports = {
-       // ...yourConfig,
+       // ...your config,
        globals: {
           before: function (done) {
              rpReporter = new RealTimeReporter(config);
@@ -190,6 +200,11 @@ Also you create `rpReporter` instance inside the `before` hook body, because the
     ```
     
 4. Now you able to use agent API in tests to report results in real time (see the API reference).
+  
+To run example:
+```cmd
+cd @reportportal/agent-js-nightwatch && npm run example:realTimeReporter:chromeDriver:parallelRun
+```
     
 ####Reporting API
 
@@ -198,24 +213,380 @@ Also you create `rpReporter` instance inside the `before` hook body, because the
 The API provide methods for starting and finishing test items and hooks.
 
 ###### startSuite
-    ```javascript
-    describe('Suite name', function() {
-      before((browser, done) => {
-        const suiteStartObj = {
-          name: 'Suite name',
-          attributes: [{ key: 'suite', value: 'any' }],
-          description: 'Suite description',
-        };
-        PublicReportingAPI.startSuite(suiteStartObj);
+`ReportingAPI.startSuite(suiteStartObj);`<br/>
+where `suiteStartObj = { name: string, attributes: Array<Attribute>, description: string }`<br/>
+**required**: `name`<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  before((browser, done) => {
+    const suiteStartObj = {
+      name: 'Suite name',
+      attributes: [{ key: 'suite', value: 'any' }],
+      description: 'Suite description',
+    };
+    ReportingAPI.startSuite(suiteStartObj);
+    done();
+  });
+});
+```
+
+###### finishSuite
+`ReportingAPI.finishSuite(suiteName);`<br/>
+**required**: `suiteName`<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  after((browser, done) => {
+      ReportingAPI.finishSuite('Suite name');
+      browser.end(() => {
         done();
       });
     });
+});
+```
+
+###### startTestCase
+`ReportingAPI.startTestCase(currentTest, parentName);`<br/>
+where `currentTest = browser.currentTest` object<br/>
+**required**: `currentTest`<br/>
+`parentName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  beforeEach((browser) => {
+      ReportingAPI.startTestCase(browser.currentTest, 'Suite name');
+    });
+});
+```
+
+###### finishTestCase
+`ReportingAPI.finishTestCase(currentTest);`<br/>
+where `currentTest = browser.currentTest` object<br/>
+**required**: `currentTest`<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  afterEach((browser) => {
+      ReportingAPI.finishTestCase(browser.currentTest);
+    });
+});
+```
+
+###### startBeforeSuite, finishBeforeSuite
+`ReportingAPI.startBeforeSuite(parentName);`<br/>
+`ReportingAPI.finishBeforeSuite(data);`<br/>
+where `data = { name: string, status: string, attributes: Array<Attribute>, description: string }`<br/>
+where `status` must be one of the following: *passed*, *failed*, *stopped*, *skipped*, *interrupted*, *cancelled*, *info*, *warn*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  before((browser, done) => {
+    ReportingAPI.startBeforeSuite();
+    // beforeSuite related actions
+    ReportingAPI.finishBeforeSuite();
+
+    ReportingAPI.startSuite({ name: 'Suite name' });
+    done();
+  });
+});
+```
+
+###### startAfterSuite, finishAfterSuite
+`ReportingAPI.startAfterSuite(parentName);`<br/>
+`ReportingAPI.finishAfterSuite(data);`<br/>
+where `data = { name: string, status: string, attributes: Array<Attribute>, description: string }`<br/>
+where `status` must be one of the following: *passed*, *failed*, *stopped*, *skipped*, *interrupted*, *cancelled*, *info*, *warn*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  after((browser, done) => {
+    ReportingAPI.finishSuite(suiteName);
     
-    ```
+    ReportingAPI.startAfterSuite();
+    // afterSuite related actions
+    ReportingAPI.finishAfterSuite();
+    
+    browser.end(() => {
+      done();
+    });
+  });
+});
+```
 
-####Example
+###### startBeforeTestCase, finishBeforeTestCase
+`ReportingAPI.startBeforeTestCase(parentName);`<br/>
+**required**: `parentName`<br/>
+`ReportingAPI.finishBeforeTestCase(data);`<br/>
+where `data = { name: string, status: string, attributes: Array<Attribute>, description: string }`<br/>
+where `status` must be one of the following: *passed*, *failed*, *stopped*, *skipped*, *interrupted*, *cancelled*, *info*, *warn*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  beforeEach((browser) => {
+    ReportingAPI.startBeforeTestCase(suiteName);
+    // beforeEach related actions
+    ReportingAPI.finishBeforeTestCase();
+      
+    ReportingAPI.startTestCase(browser.currentTest, suiteName);
+  });
+});
+```
 
-To run example:
-```cmd
-cd @reportportal/agent-js-nightwatch && npm run example:postFactumReporter
+###### startAfterTestCase, finishAfterTestCase
+`ReportingAPI.startAfterTestCase(parentName);`<br/>
+**required**: `parentName`<br/>
+`ReportingAPI.finishAfterTestCase(data);`<br/>
+where `data = { name: string, status: string, attributes: Array<Attribute>, description: string }`<br/>
+where `status` must be one of the following: *passed*, *failed*, *stopped*, *skipped*, *interrupted*, *cancelled*, *info*, *warn*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  afterEach((browser) => {
+    ReportingAPI.finishTestCase(browser.currentTest);
+    
+    ReportingAPI.startAfterTestCase(suiteName);
+    // afterEach related actions
+    ReportingAPI.finishAfterTestCase();
+  });
+});
+```
+
+#####Data attaching
+
+The API provide methods for attaching data (logs, attributes, description, testCaseId, status).
+
+###### addAttributes
+Add attributes(tags) to the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.addAttributes(attributes: Array<Attribute>, itemName?: string);`<br/>
+**required**: `attributes`<br/>
+`itemName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    ReportingAPI.addAttributes([{ key: 'check', value: 'success' }]);
+  });
+});
+```
+
+###### addDescription
+Append text description to the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.addDescription(text: string, itemName?: string);`<br/>
+**required**: `text`<br/>
+`itemName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    ReportingAPI.addDescription('Item description');
+  });
+});
+```
+
+###### setTestCaseId
+Set test case id to the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.setTestCaseId(id: string, itemName?: string);`<br/>
+**required**: `id`<br/>
+`itemName` **required** only for parallel run<br/>
+If testCaseId not specified, it will be generated automatically.<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    ReportingAPI.setTestCaseId('itemTestCaseId');
+  });
+});
+```
+
+###### log
+Send logs to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.log(level: LOG_LEVELS, message: string, file?: Attachment, itemName?: string);`<br/>
+**required**: `level`, `message`<br/>
+`itemName` **required** only for parallel run<br/>
+where `level` can be one of the following: *TRACE*, *DEBUG*, *WARN*, *INFO*, *ERROR*, *FATAL*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    const attachment = {
+      name: 'Cities',
+      type: FILE_TYPES.JSON,
+      content: fs.readFileSync(path.resolve(__dirname, '../data', 'cities.json')),
+    };
+
+    ReportingAPI.log('INFO', 'Log with attachment', attachment);
+  });
+});
+```
+
+###### logInfo, logDebug, logWarn, logError, logTrace, logFatal
+Send logs with corresponding level to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.logInfo(message: string, file?: Attachment, itemName?: string);`<br/>
+`ReportingAPI.logDebug(message: string, file?: Attachment, itemName?: string);`<br/>
+`ReportingAPI.logWarn(message: string, file?: Attachment, itemName?: string);`<br/>
+`ReportingAPI.logError(message: string, file?: Attachment, itemName?: string);`<br/>
+`ReportingAPI.logTrace(message: string, file?: Attachment, itemName?: string);`<br/>
+`ReportingAPI.logFatal(message: string, file?: Attachment, itemName?: string);`<br/>
+**required**: `message`<br/>
+`itemName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    ReportingAPI.logInfo('Log message');
+    ReportingAPI.logDebug('Log message');
+    ReportingAPI.logWarn('Log message');
+    ReportingAPI.logError('Log message');
+    ReportingAPI.logTrace('Log message');
+    ReportingAPI.logFatal('Log message');
+  });
+});
+```
+
+###### launchLog
+Send logs to report portal for the current launch. Should be called inside of the any test.<br/>
+`ReportingAPI.log(level: LOG_LEVELS, message: string, file?: Attachment);`<br/>
+**required**: `level`, `message`<br/>
+where `level` can be one of the following: *TRACE*, *DEBUG*, *WARN*, *INFO*, *ERROR*, *FATAL*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    const attachment = {
+      name: 'Cities',
+      type: FILE_TYPES.JSON,
+      content: fs.readFileSync(path.resolve(__dirname, '../data', 'cities.json')),
+    };
+
+    ReportingAPI.launchLog('INFO', 'Log with attachment for launch', attachment);
+  });
+});
+```
+
+###### launchLogInfo, launchLogDebug, launchLogWarn, launchLogError, launchLogTrace, launchLogFatal
+Send logs with corresponding level to report portal for the current launch. Should be called inside of the any test.<br/>
+`ReportingAPI.launchLogInfo(message: string, file?: Attachment);`<br/>
+`ReportingAPI.launchLogDebug(message: string, file?: Attachment);`<br/>
+`ReportingAPI.launchLogWarn(message: string, file?: Attachment);`<br/>
+`ReportingAPI.launchLogError(message: string, file?: Attachment);`<br/>
+`ReportingAPI.launchLogTrace(message: string, file?: Attachment);`<br/>
+`ReportingAPI.launchLogFatal(message: string, file?: Attachment);`<br/>
+**required**: `message`<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    ReportingAPI.launchLogInfo('Log message');
+    ReportingAPI.launchLogDebug('Log message');
+    ReportingAPI.launchLogWarn('Log message');
+    ReportingAPI.launchLogError('Log message');
+    ReportingAPI.launchLogTrace('Log message');
+    ReportingAPI.launchLogFatal('Log message');
+  });
+});
+```
+
+###### setStatus
+Assign corresponding status to the current test item or for provided by name.<br/>
+`ReportingAPI.setStatus(status: string, itemName?: string);`<br/>
+**required**: `status`<br/>
+`itemName` **required** only for parallel run<br/>
+where `status` must be one of the following: *passed*, *failed*, *stopped*, *skipped*, *interrupted*, *cancelled*, *info*, *warn*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function(browser) {
+    ReportingAPI.setStatus('passed', browser.currentTest.name);
+  });
+});
+```
+
+###### setStatusFailed, setStatusPassed, setStatusSkipped, setStatusStopped, setStatusInterrupted, setStatusCancelled, setStatusInfo, setStatusWarn
+ Assign corresponding status to the current test item or for provided by name.<br/>
+`ReportingAPI.setStatusFailed(itemName?: string);`<br/>
+`ReportingAPI.setStatusPassed(itemName?: string);`<br/>
+`ReportingAPI.setStatusSkipped(itemName?: string);`<br/>
+`ReportingAPI.setStatusStopped(itemName?: string);`<br/>
+`ReportingAPI.setStatusInterrupted(itemName?: string);`<br/>
+`ReportingAPI.setStatusCancelled(itemName?: string);`<br/>
+`ReportingAPI.setStatusInfo(itemName?: string);`<br/>
+`ReportingAPI.setStatusWarn(itemName?: string);`<br/>
+**required**: `message`<br/>
+`itemName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function() {
+    ReportingAPI.setStatusFailed('Log message');
+    ReportingAPI.setStatusPassed('Log message');
+    ReportingAPI.setStatusSkipped('Log message');
+    ReportingAPI.setStatusStopped('Log message');
+    ReportingAPI.setStatusInterrupted('Log message');
+    ReportingAPI.setStatusCancelled('Log message');
+    ReportingAPI.setStatusInfo('Log message');
+    ReportingAPI.setStatusWarn('Log message');
+  });
+});
+```
+
+####ReportPortal custom commands
+
+Do not forget to specify custom commands path in your `nightwatch.conf.js` file:
+```javascript
+module.exports = {
+   // ...your config,
+   custom_commands_path: path.resolve('@reportportal/agent-js-nightwatch/commands'),
+}
+```
+
+#####rpLog
+Send log with corresponding level to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.setStatus(message: string, level: string, itemName?: string);`<br/>
+**required**: `message, level = 'INFO'`<br/>
+`itemName` **required** only for parallel run<br/>
+where `level` can be one of the following: *TRACE*, *DEBUG*, *WARN*, *INFO*, *ERROR*, *FATAL*<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function(browser) {
+    browser
+      .url('https://www.ecosia.org/')
+      .rpLog('Log message')
+      .end();
+  });
+});
+```
+
+#####rpSaveScreenshot
+Send log with screenshot attachment with provided name to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.rpSaveScreenshot(fileName: string, itemName?: string, callback?: function);`<br/>
+**required**: `fileName`<br/>
+`itemName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function(browser) {
+    browser
+      .url('https://www.ecosia.org/')
+      .rpSaveScreenshot('rpTestScreen.jpg')
+      .end();
+  });
+});
+```
+
+#####rpSaveScreenshot
+Send log with screenshot attachment to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
+`ReportingAPI.rpSaveScreenshot(itemName?: string, callback?: function);`<br/>
+`itemName` **required** only for parallel run<br/>
+Example:
+```javascript
+describe('Suite name', function() {
+  test('ecosia.org test', function(browser) {
+    browser
+      .url('https://www.ecosia.org/')
+      .rpScreenshot()
+      .end();
+  });
+});
 ```

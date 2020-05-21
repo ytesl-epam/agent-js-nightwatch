@@ -20,7 +20,7 @@ import { screenshotCallbackType, ScreenshotDataInterface } from '../models/night
 import { PublicReportingAPI } from '../realTimeReporter';
 
 // More about custom commands in Nightwatch - https://nightwatchjs.org/guide/extending-nightwatch/#writing-custom-commands
-export const command = function (itemName: string, callback?: screenshotCallbackType) {
+export const command = function (itemName?: string, callback?: screenshotCallbackType) {
   return this.screenshot(false, (data: ScreenshotDataInterface) => {
     PublicReportingAPI.logInfo('Screenshot', {
       name: 'testScreen',
