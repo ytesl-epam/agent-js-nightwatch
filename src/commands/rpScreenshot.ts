@@ -17,12 +17,12 @@
 
 import { DEFAULT_FILE_TYPE } from '../constants';
 import { screenshotCallbackType, ScreenshotDataInterface } from '../models/nightwatch';
-import { PublicReportingAPI } from '../realTimeReporter';
+import { ReportingAPI } from '../realTimeReporter';
 
 // More about custom commands in Nightwatch - https://nightwatchjs.org/guide/extending-nightwatch/#writing-custom-commands
 export const command = function (itemName?: string, callback?: screenshotCallbackType) {
   return this.screenshot(false, (data: ScreenshotDataInterface) => {
-    PublicReportingAPI.logInfo('Screenshot', {
+    ReportingAPI.logInfo('Screenshot', {
       name: 'testScreen',
       type: DEFAULT_FILE_TYPE,
       content: data.value,

@@ -20,7 +20,7 @@ import { command as rpScreenshot } from '../commands/rpScreenshot';
 import { command as rpSaveScreenshot } from '../commands/rpSaveScreenshot';
 import { screenshotCallbackType, ScreenshotDataInterface } from '../models/nightwatch';
 import * as utils from '../utils';
-import { PublicReportingAPI } from '../realTimeReporter';
+import { ReportingAPI } from '../realTimeReporter';
 import * as IPCClient from '../realTimeReporter/ipc/client';
 import { DEFAULT_FILE_TYPE, LOG_LEVELS } from '../constants';
 
@@ -50,8 +50,8 @@ describe('commands', function () {
       expect(spyPerform).toHaveBeenCalledTimes(1);
     });
 
-    test('should call log method from PublicReportingAPI to send log message to reporter', function () {
-      const spyReportingApiLog = jest.spyOn(PublicReportingAPI, 'log');
+    test('should call log method from ReportingAPI to send log message to reporter', function () {
+      const spyReportingApiLog = jest.spyOn(ReportingAPI, 'log');
 
       rpLog.call(commandsExecutionContext, 'Log message', LOG_LEVELS.INFO, 'parent name');
 
@@ -59,7 +59,7 @@ describe('commands', function () {
     });
 
     test('should set parameter level to INFO in case it missed in arguments', function () {
-      const spyReportingApiLog = jest.spyOn(PublicReportingAPI, 'log');
+      const spyReportingApiLog = jest.spyOn(ReportingAPI, 'log');
 
       rpLog.call(commandsExecutionContext, 'Log message');
 
@@ -86,8 +86,8 @@ describe('commands', function () {
       expect(spyScreenshot).toHaveBeenCalledTimes(1);
     });
 
-    test('should call logInfo method from PublicReportingAPI to send log with screenshot to reporter', function () {
-      const spyReportingApiLogInfo = jest.spyOn(PublicReportingAPI, 'logInfo');
+    test('should call logInfo method from ReportingAPI to send log with screenshot to reporter', function () {
+      const spyReportingApiLogInfo = jest.spyOn(ReportingAPI, 'logInfo');
 
       rpScreenshot.call(commandsExecutionContext, 'itemName');
 
@@ -143,8 +143,8 @@ describe('commands', function () {
       expect(spyGetFileMimeType).toHaveBeenCalledWith('fileName');
     });
 
-    test('should call logInfo method from PublicReportingAPI to send log with screenshot to reporter', function () {
-      const spyReportingApiLogInfo = jest.spyOn(PublicReportingAPI, 'logInfo');
+    test('should call logInfo method from ReportingAPI to send log with screenshot to reporter', function () {
+      const spyReportingApiLogInfo = jest.spyOn(ReportingAPI, 'logInfo');
 
       rpSaveScreenshot.call(commandsExecutionContext, 'fileName', 'itemName');
 
