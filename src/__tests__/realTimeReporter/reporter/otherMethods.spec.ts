@@ -161,25 +161,12 @@ describe('otherMethods', function () {
   describe('getFinishItemObj', function () {
     const storageTestItem: StorageTestItem = getStorageTestItemMock('itemName');
 
-    test('should return storage item data in case of no testResult', function () {
+    test('should return storage item data with other data from testResult in case of no results in testResult', function () {
       // @ts-ignore access to the class private property
-      const finishItemObj = reporter.getFinishItemObj(null, storageTestItem);
+      const finishItemObj = reporter.getFinishItemObj({ status: STATUSES.PASSED }, storageTestItem);
       const { id, ...data } = storageTestItem;
 
-      expect(finishItemObj).toEqual(data);
-    });
-
-    test('should return storage item data in case of no results in testResult', function () {
-      // @ts-ignore access to the class private property
-      const finishItemObj = reporter.getFinishItemObj(
-        {
-          results: null,
-        },
-        storageTestItem,
-      );
-      const { id, ...data } = storageTestItem;
-
-      expect(finishItemObj).toEqual(data);
+      expect(finishItemObj).toEqual({ ...data, status: STATUSES.PASSED });
     });
 
     test('invokes calculateTestItemStatus in case of results exists to receive proper item status', function () {

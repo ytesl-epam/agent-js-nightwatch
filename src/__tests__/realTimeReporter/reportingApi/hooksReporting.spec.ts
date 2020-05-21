@@ -18,7 +18,7 @@
 import { hooksReporting } from '../../../realTimeReporter/reportingApi/hooksReporting';
 import * as IPCClient from '../../../realTimeReporter/ipc/client';
 import * as commonUtils  from '../../../realTimeReporter/utils';
-import { EVENTS, TEST_ITEM_TYPES } from '../../../constants';
+import { EVENTS, STATUSES, TEST_ITEM_TYPES } from '../../../constants';
 
 describe('hooksReporting', function () {
   let spyPublishEvent: jest.SpyInstance;
@@ -60,14 +60,15 @@ describe('hooksReporting', function () {
   });
 
   describe('finishBeforeSuite', function () {
-    test('should call publishEvent util to send event to reporter with test hook result', function () {
+    test('should call publishEvent util to send event to reporter with test hook result with default PASSED status', function () {
       hooksReporting.finishBeforeSuite();
 
-      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, { name: 'Before suite' });
+      const expectedItemObj = { name: 'Before suite', status: STATUSES.PASSED };
+      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, expectedItemObj);
     });
 
-    test('should overwrite default hook name if the other one exists in parameters', function () {
-      const finishHookRQ = { name: 'Not before suite' };
+    test('should overwrite default hook name & status if the other one exists in parameters', function () {
+      const finishHookRQ = { name: 'Not before suite', status: STATUSES.SKIPPED };
 
       // @ts-ignore required status property
       hooksReporting.finishBeforeSuite(finishHookRQ);
@@ -106,14 +107,15 @@ describe('hooksReporting', function () {
   });
 
   describe('finishAfterSuite', function () {
-    test('should call publishEvent util to send event to reporter with test hook result', function () {
+    test('should call publishEvent util to send event to reporter with test hook result with default PASSED status', function () {
       hooksReporting.finishAfterSuite();
 
-      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, { name: 'After suite' });
+      const expectedItemObj = { name: 'After suite', status: STATUSES.PASSED };
+      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, expectedItemObj);
     });
 
-    test('should overwrite default hook name if the other one exists in parameters', function () {
-      const finishHookRQ = { name: 'Not after suite' };
+    test('should overwrite default hook name & status if the other one exists in parameters', function () {
+      const finishHookRQ = { name: 'Not after suite', status: STATUSES.SKIPPED };
 
       // @ts-ignore required status property
       hooksReporting.finishAfterSuite(finishHookRQ);
@@ -152,14 +154,15 @@ describe('hooksReporting', function () {
   });
 
   describe('finishBeforeTestCase', function () {
-    test('should call publishEvent util to send event to reporter with test hook result', function () {
+    test('should call publishEvent util to send event to reporter with test hook result with default PASSED status', function () {
       hooksReporting.finishBeforeTestCase();
 
-      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, { name: 'Before test' });
+      const expectedItemObj = { name: 'Before test', status: STATUSES.PASSED };
+      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, expectedItemObj);
     });
 
-    test('should overwrite default hook name if the other one exists in parameters', function () {
-      const finishHookRQ = { name: 'Not before test' };
+    test('should overwrite default hook name & status if the other one exists in parameters', function () {
+      const finishHookRQ = { name: 'Not before test', status: STATUSES.SKIPPED };
 
       // @ts-ignore required status property
       hooksReporting.finishBeforeTestCase(finishHookRQ);
@@ -198,14 +201,15 @@ describe('hooksReporting', function () {
   });
 
   describe('finishAfterTestCase', function () {
-    test('should call publishEvent util to send event to reporter with test hook result', function () {
+    test('should call publishEvent util to send event to reporter with test hook result with default PASSED status', function () {
       hooksReporting.finishAfterTestCase();
 
-      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, { name: 'After test' });
+      const expectedItemObj = { name: 'After test', status: STATUSES.PASSED };
+      expect(spyPublishEvent).toHaveBeenCalledWith(EVENTS.FINISH_TEST_ITEM, expectedItemObj);
     });
 
-    test('should overwrite default hook name if the other one exists in parameters', function () {
-      const finishHookRQ = { name: 'Not after test' };
+    test('should overwrite default hook name & status if the other one exists in parameters', function () {
+      const finishHookRQ = { name: 'Not after test', status: STATUSES.SKIPPED };
 
       // @ts-ignore required status property
       hooksReporting.finishAfterTestCase(finishHookRQ);
