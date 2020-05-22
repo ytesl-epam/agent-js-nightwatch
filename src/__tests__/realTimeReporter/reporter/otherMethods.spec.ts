@@ -57,7 +57,7 @@ describe('otherMethods', function () {
 
   describe('registerEventListeners (called in initReporter constructor)', function () {
     test('invokes server on method the 6 times for necessary events', function () {
-      expect(spyServerOn).toHaveBeenCalledTimes(7);
+      expect(spyServerOn).toHaveBeenCalledTimes(8);
     });
 
     test('invokes server on method for START_TEST_ITEM event', function () {
@@ -122,6 +122,15 @@ describe('otherMethods', function () {
         reporter.setTestCaseId
       );
     });
+
+    test('invokes server on method for SET_STATUS event', function () {
+      expect(spyServerOn).toHaveBeenNthCalledWith(
+        8,
+        EVENTS.SET_STATUS,
+        // @ts-ignore access to the class private property
+        reporter.setStatusToItem
+      );
+    });
   });
 
   describe('stopReporter', function () {
@@ -152,31 +161,12 @@ describe('otherMethods', function () {
   describe('getFinishItemObj', function () {
     const storageTestItem: StorageTestItem = getStorageTestItemMock('itemName');
 
-    test('should return PASSED status in case of no testResult', function () {
+    test('should return storage item data with other data from testResult in case of no results in testResult', function () {
       // @ts-ignore access to the class private property
-      const finishItemObj = reporter.getFinishItemObj(null, storageTestItem);
+      const finishItemObj = reporter.getFinishItemObj({ status: STATUSES.PASSED }, storageTestItem);
       const { id, ...data } = storageTestItem;
 
-      expect(finishItemObj).toEqual({
-        ...data,
-        status: STATUSES.PASSED,
-      });
-    });
-
-    test('should return PASSED status in case of no results in testResult', function () {
-      // @ts-ignore access to the class private property
-      const finishItemObj = reporter.getFinishItemObj(
-        {
-          results: null,
-        },
-        storageTestItem,
-      );
-      const { id, ...data } = storageTestItem;
-
-      expect(finishItemObj).toEqual({
-        ...data,
-        status: STATUSES.PASSED,
-      });
+      expect(finishItemObj).toEqual({ ...data, status: STATUSES.PASSED });
     });
 
     test('invokes calculateTestItemStatus in case of results exists to receive proper item status', function () {

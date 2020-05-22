@@ -184,8 +184,7 @@ describe('calculateTestItemStatus', function() {
     const itemInfo = calculateTestItemStatus(testResult);
 
     expect(itemInfo.status).toBe(STATUSES.FAILED);
-    expect(itemInfo.assertionsMessage).toBe(`Error
-from launchController`);
+    expect(itemInfo.assertionsMessage).toBe(`Error<br/>from launchController`);
   });
 
   test('should return object with PASSED status in case of no skipped and failed items', function () {

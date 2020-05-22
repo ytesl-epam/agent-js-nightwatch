@@ -42,8 +42,7 @@ export const calculateTestItemStatus = (testResult: any): { status: STATUSES, as
     status = STATUSES.FAILED;
     const assertionsResult = currentTestItemResults.assertions[0];
 
-    assertionsMessage = `${assertionsResult.fullMsg}
-${assertionsResult.stackTrace}`;
+    assertionsMessage = `${assertionsResult.fullMsg}<br/>${assertionsResult.stackTrace}`;
   } else {
     status = STATUSES.PASSED;
   }

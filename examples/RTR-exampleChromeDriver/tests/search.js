@@ -59,5 +59,6 @@ module.exports = {
     };
 
     PublicReportingAPI.launchLogInfo('Log with attachment for launch', attachment);
+    PublicReportingAPI.setStatusPassed();
   }
 };

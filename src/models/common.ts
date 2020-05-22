@@ -56,7 +56,7 @@ export interface RPItemStartRQ extends RPItem {
 }
 
 export interface RPItemFinishRQ extends RPItem {
-  status: STATUSES;
+  status?: STATUSES;
   endTime?: Date;
 }
 
@@ -64,4 +64,5 @@ export interface StorageTestItem extends RPItem {
   id: string;
   name: string;
   testCaseId?: string;
+  status?: STATUSES;
 }

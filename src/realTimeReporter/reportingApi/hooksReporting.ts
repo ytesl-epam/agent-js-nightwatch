@@ -15,8 +15,8 @@
  *
  */
 
-import { FinishTestItemRQ, StartTestItemRQ } from '../../models';
-import { EVENTS, TEST_ITEM_TYPES } from '../../constants';
+import { FinishTestItemRQ } from '../../models';
+import { EVENTS, TEST_ITEM_TYPES, STATUSES } from '../../constants';
 import { getCodeRef } from '../utils';
 import { publishIPCEvent as publishEvent } from '../ipc/client';
 
@@ -39,71 +39,71 @@ export const hooksReporting: HooksReportingInterface = {
     const hookName = 'Before suite';
     const codeRef = getCodeRef(hookName);
 
-    const suiteObj = {
+    const itemObj = {
       type: TEST_ITEM_TYPES.BEFORE_SUITE,
       name: hookName,
       codeRef,
       parentName,
     };
 
-    publishEvent(EVENTS.START_TEST_ITEM, suiteObj);
+    publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
   finishBeforeSuite(data: FinishTestItemRQ): void {
-    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before suite', ...data });
+    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before suite', status: STATUSES.PASSED, ...data });
   },
 
   startAfterSuite(parentName: string): void {
     const hookName = 'After suite';
     const codeRef = getCodeRef(hookName);
 
-    const suiteObj = {
+    const itemObj = {
       type: TEST_ITEM_TYPES.AFTER_SUITE,
       name: hookName,
       codeRef,
       parentName,
     };
 
-    publishEvent(EVENTS.START_TEST_ITEM, suiteObj);
+    publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
   finishAfterSuite(data: FinishTestItemRQ): void {
-    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After suite', ...data });
+    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After suite', status: STATUSES.PASSED, ...data });
   },
 
   startBeforeTestCase(parentName: string): void {
     const hookName = 'Before test';
     const codeRef = getCodeRef(hookName);
 
-    const suiteObj = {
+    const itemObj = {
       type: TEST_ITEM_TYPES.BEFORE_TEST,
       name: hookName,
       codeRef,
       parentName,
     };
 
-    publishEvent(EVENTS.START_TEST_ITEM, suiteObj);
+    publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
   finishBeforeTestCase(data: FinishTestItemRQ): void {
-    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before test', ...data });
+    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before test', status: STATUSES.PASSED, ...data });
   },
 
   startAfterTestCase(parentName: string): void {
     const hookName = 'After test';
     const codeRef = getCodeRef(hookName);
 
-    const suiteObj = {
+    const itemObj = {
       type: TEST_ITEM_TYPES.AFTER_TEST,
       name: hookName,
       codeRef,
       parentName,
     };
 
-    publishEvent(EVENTS.START_TEST_ITEM, suiteObj);
+    publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
   finishAfterTestCase(data: FinishTestItemRQ): void {
-    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After test', ...data });
+    publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After test', status: STATUSES.PASSED, ...data });
   },
 };

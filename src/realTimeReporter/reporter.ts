@@ -55,6 +55,7 @@ export default class Reporter {
     server.on(EVENTS.ADD_ATTRIBUTES, this.addItemAttributes);
     server.on(EVENTS.ADD_DESCRIPTION, this.addItemDescription);
     server.on(EVENTS.SET_TEST_CASE_ID, this.setTestCaseId);
+    server.on(EVENTS.SET_STATUS, this.setStatusToItem);
   };
 
   private initReporter(): void {
@@ -69,11 +70,12 @@ export default class Reporter {
 
   private getFinishItemObj(testResult: any, storageItem: StorageTestItem): FinishTestItemRQ {
     const { id, ...data } = storageItem;
+    const { name, ...resultData } = testResult;
 
-    if (!testResult || !testResult.results) {
+    if (!testResult.results) {
       return {
         ...data,
-        status: STATUSES.PASSED,
+        ...resultData,
       };
     }
 
@@ -89,8 +91,8 @@ export default class Reporter {
     }
 
     return {
-      ...data,
       status,
+      ...data,
     };
   };
 
@@ -162,5 +164,12 @@ export default class Reporter {
     const currentItem = this.storage.getCurrentItem(itemName);
 
     currentItem.testCaseId = id;
+  };
+
+  private setStatusToItem = (data: { status: STATUSES; itemName?: string }): void => {
+    const { status, itemName } = data;
+    const currentItem = this.storage.getCurrentItem(itemName);
+
+    currentItem.status = status;
   };
 }
