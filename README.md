@@ -4,13 +4,13 @@ Agent for integration NightwatchJS with ReportPortal.
 * More about [NightwatchJS](https://nightwatchjs.org/)
 * More about [ReportPortal](http://reportportal.io/)
 
-##Installation
+## Installation
 
 Install the agent in your project:
 ```cmd
 npm install --save-dev @reportportal/agent-js-nightwatch
 ```
-##Configuration
+## Configuration
 
 Create rp.json file with reportportal configuration:
 ```json
@@ -45,13 +45,13 @@ Create rp.json file with reportportal configuration:
 | rerunOf               | UUID of launch you want to rerun. If not specified, report portal will update the latest launch with the same name|
 | parallelRun           | *Default: false.* Indicates if tests running in parallel (uses for post-factum-reporter)|
 
-##Reporting
+## Reporting
 
 **This agent supports two types of reporting:**
 * Post-factum reporting
 * Real-time reporting
 
-###Post-factum  reporting
+### Post-factum  reporting
 
 This reporter sends results of test executions to Report Portal when **all tests have been finished**.
 
@@ -86,7 +86,7 @@ With chromeDriver:
 cd @reportportal/agent-js-nightwatch && npm run example:postFactumReporter:chromeDriver
 ```
 
-###Real-time reporting
+### Real-time reporting
 
 This reporter sends results of test executions to Report Portal **during tests run**.
 
@@ -96,7 +96,7 @@ Since tests in nightwatch can be run sequentially or in parallel, each of the ex
 
 Each run type supports the Reporting API to use it directly in tests.
 
-####Default run
+#### Default run
 
 1. Create the `nightwatch.conf.js` configuration file.
 
@@ -146,7 +146,7 @@ To run example:
 cd @reportportal/agent-js-nightwatch && npm run example:realTimeReporter:chromeDriver
 ```
 
-####Parallel run
+#### Parallel run
 
 1. Create the `nightwatch.conf.js` configuration file.
 
@@ -206,9 +206,9 @@ To run example:
 cd @reportportal/agent-js-nightwatch && npm run example:realTimeReporter:chromeDriver:parallelRun
 ```
     
-####Reporting API
+#### Reporting API
 
-#####Items&hooks reporting
+##### Items&hooks reporting
 
 The API provide methods for starting and finishing test items and hooks.
 
@@ -352,7 +352,7 @@ describe('Suite name', function() {
 });
 ```
 
-#####Data attaching
+##### Data attaching
 
 The API provide methods for attaching data (logs, attributes, description, testCaseId, status).
 
@@ -530,7 +530,7 @@ describe('Suite name', function() {
 });
 ```
 
-####ReportPortal custom commands
+#### ReportPortal custom commands
 
 Do not forget to specify custom commands path in your `nightwatch.conf.js` file:
 ```javascript
@@ -540,7 +540,7 @@ module.exports = {
 }
 ```
 
-#####rpLog
+##### rpLog
 Send log with corresponding level to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
 `ReportingAPI.setStatus(message: string, level: string, itemName?: string);`<br/>
 **required**: `message, level = 'INFO'`<br/>
@@ -558,7 +558,7 @@ describe('Suite name', function() {
 });
 ```
 
-#####rpSaveScreenshot
+##### rpSaveScreenshot
 Send log with screenshot attachment with provided name to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
 `ReportingAPI.rpSaveScreenshot(fileName: string, itemName?: string, callback?: function);`<br/>
 **required**: `fileName`<br/>
@@ -575,9 +575,9 @@ describe('Suite name', function() {
 });
 ```
 
-#####rpSaveScreenshot
+##### rpScreenshot
 Send log with screenshot attachment to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
-`ReportingAPI.rpSaveScreenshot(itemName?: string, callback?: function);`<br/>
+`ReportingAPI.rpScreenshot(itemName?: string, callback?: function);`<br/>
 `itemName` **required** only for parallel run<br/>
 Example:
 ```javascript
