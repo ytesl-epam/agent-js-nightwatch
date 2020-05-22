@@ -1,8 +1,8 @@
 const chromedriver = require('chromedriver');
-const { RealTimeReporter, PublicReportingAPI } = require('../../build');
+const { RealTimeReporter, ReportingAPI } = require('../../build');
 const config = require('../rp');
 
-let rpReporter;
+const rpReporter = new RealTimeReporter({ ...config, launch: 'REAL_TIME_REPORTER_LAUNCH' });
 
 module.exports = {
   src_folders: ['./RTR-exampleChromeDriver/tests'],
@@ -19,8 +19,7 @@ module.exports = {
       },
       globals: {
         before: function (done) {
-          PublicReportingAPI.init();
-          rpReporter = new RealTimeReporter({ ...config, launch: 'REAL_TIME_REPORTER_LAUNCH' });
+          ReportingAPI.init();
 
           const launchParams = {
             description: 'This launch contains nightwatch tests results run with chromedriver',
@@ -34,7 +33,7 @@ module.exports = {
         after: function (done) {
           rpReporter.finishLaunch();
 
-          PublicReportingAPI.destroy();
+          ReportingAPI.destroy();
           done();
         },
       },

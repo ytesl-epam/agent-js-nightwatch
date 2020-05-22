@@ -16,9 +16,9 @@
  */
 
 import RealTimeReporter from './reporter';
-import PublicReportingAPI from './reportingApi';
+import ReportingAPI from './reportingApi';
 
 export {
   RealTimeReporter,
-  PublicReportingAPI,
+  ReportingAPI,
 };

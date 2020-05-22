@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { PublicReportingAPI, FILE_TYPES } = require('../../../build');
+const { ReportingAPI, FILE_TYPES } = require('../../../build');
 
 const suiteName = 'Search';
 
@@ -11,23 +11,23 @@ module.exports = {
       description: 'Suite description',
       attributes: [{ key: 'suite', value: 'search' }],
     };
-    PublicReportingAPI.startSuite(item);
+    ReportingAPI.startSuite(item);
   },
 
   beforeEach: function (browser) {
-    PublicReportingAPI.startTestCase(browser.currentTest, suiteName);
+    ReportingAPI.startTestCase(browser.currentTest, suiteName);
   },
 
   afterEach: function (browser) {
-    PublicReportingAPI.finishTestCase(browser.currentTest);
+    ReportingAPI.finishTestCase(browser.currentTest);
 
-    PublicReportingAPI.startAfterTestCase(suiteName);
+    ReportingAPI.startAfterTestCase(suiteName);
     // afterEach related actions
-    PublicReportingAPI.finishAfterTestCase();
+    ReportingAPI.finishAfterTestCase();
   },
 
   after: function (browser, done) {
-    PublicReportingAPI.finishSuite(suiteName);
+    ReportingAPI.finishSuite(suiteName);
     browser.end(() => {
       done();
     });
@@ -38,10 +38,10 @@ module.exports = {
       .url('https://google.com')
       .waitForElementPresent('foo', 1000);
 
-    PublicReportingAPI.logInfo('Info log for demo test item');
-    PublicReportingAPI.launchLogDebug('Debug log for launch');
-    PublicReportingAPI.addDescription('Demo test for google.com');
-    PublicReportingAPI.setTestCaseId('itemTestCaseId');
+    ReportingAPI.logInfo('Info log for demo test item');
+    ReportingAPI.launchLogDebug('Debug log for launch');
+    ReportingAPI.addDescription('Demo test for google.com');
+    ReportingAPI.setTestCaseId('itemTestCaseId');
   },
 
   'searching nightwatch' : function(browser) {
@@ -58,7 +58,7 @@ module.exports = {
       content: fs.readFileSync(path.resolve(__dirname, '../data', 'cities.json')),
     };
 
-    PublicReportingAPI.launchLogInfo('Log with attachment for launch', attachment);
-    PublicReportingAPI.setStatusPassed();
+    ReportingAPI.launchLogInfo('Log with attachment for launch', attachment);
+    ReportingAPI.setStatusPassed();
   }
 };

@@ -1,4 +1,4 @@
-const { PublicReportingAPI } = require('../../../build');
+const { ReportingAPI } = require('../../../build');
 
 const suiteName = 'Home';
 
@@ -7,41 +7,41 @@ describe(suiteName, function() {
   this.retries(3);
 
   before(() => {
-    PublicReportingAPI.startBeforeSuite();
+    ReportingAPI.startBeforeSuite();
     // beforeSuite related actions
-    PublicReportingAPI.finishBeforeSuite();
+    ReportingAPI.finishBeforeSuite();
 
     const item = {
       name: suiteName,
       attributes: [{ key: 'suite', value: 'home.js' }],
       description: 'Suite description',
     };
-    PublicReportingAPI.startSuite(item);
+    ReportingAPI.startSuite(item);
   });
 
   after((browser, done) => {
-    PublicReportingAPI.finishSuite(suiteName);
+    ReportingAPI.finishSuite(suiteName);
     browser.end(() => {
       done();
     });
   });
 
   beforeEach((browser) => {
-    PublicReportingAPI.startTestCase(browser.currentTest, suiteName);
+    ReportingAPI.startTestCase(browser.currentTest, suiteName);
   });
 
   afterEach((browser) => {
-    PublicReportingAPI.finishTestCase(browser.currentTest);
+    ReportingAPI.finishTestCase(browser.currentTest);
   });
 
   test('ecosia.org test', function(browser) {
-    PublicReportingAPI.addDescription('Demo test for ecosia.org');
+    ReportingAPI.addDescription('Demo test for ecosia.org');
 
     browser
       .url('https://www.ecosia.org/')
       .setValue('input[type=search]', 'nightwatch')
       .saveScreenshot('testScreen.png', (data) => {
-        PublicReportingAPI.logInfo('This is a log with screenshot attachment', {
+        ReportingAPI.logInfo('This is a log with screenshot attachment', {
           name: 'testScreen',
           content: data.value,
         });
@@ -52,14 +52,14 @@ describe(suiteName, function() {
       .assert.containsText('.mainline-results', 'Nightwatch.js')
       .end();
 
-    PublicReportingAPI.logInfo('Info log for suite', null, suiteName);
+    ReportingAPI.logInfo('Info log for suite', null, suiteName);
 
-    PublicReportingAPI.addAttributes([{ key: 'check', value: 'success' }]);
-    PublicReportingAPI.addDescription('Attributes added to the test item');
+    ReportingAPI.addAttributes([{ key: 'check', value: 'success' }]);
+    ReportingAPI.addDescription('Attributes added to the test item');
   });
 
   test('search nightwatch on ecosia.org', function(browser) {
-    PublicReportingAPI.addDescription('Demo test for ecosia.org #2');
+    ReportingAPI.addDescription('Demo test for ecosia.org #2');
 
     let expectedMainlineText = 'Nightwatch.jsasd';
 

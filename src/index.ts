@@ -16,13 +16,13 @@
  */
 
 import PostFactumReporter from './postFactumReporter';
-import { RealTimeReporter, PublicReportingAPI } from './realTimeReporter';
+import { RealTimeReporter, ReportingAPI } from './realTimeReporter';
 import { LOG_LEVELS, FILE_TYPES } from './constants';
 
 export {
   PostFactumReporter,
   RealTimeReporter,
-  PublicReportingAPI,
+  ReportingAPI,
   LOG_LEVELS,
   FILE_TYPES,
 };

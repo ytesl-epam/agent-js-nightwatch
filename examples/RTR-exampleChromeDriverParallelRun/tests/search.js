@@ -17,8 +17,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { PublicReportingAPI, FILE_TYPES } = require('../../../build');
-PublicReportingAPI.init();
+const { ReportingAPI, FILE_TYPES } = require('../../../build');
+ReportingAPI.init();
 
 const suiteName = 'Search';
 
@@ -29,25 +29,25 @@ module.exports = {
       description: 'Suite description',
       attributes: [{ key: 'suite', value: 'someOtherTest.js' }],
     };
-    PublicReportingAPI.startSuite(item);
+    ReportingAPI.startSuite(item);
   },
 
   beforeEach: function (browser) {
-    PublicReportingAPI.startTestCase(browser.currentTest, suiteName);
+    ReportingAPI.startTestCase(browser.currentTest, suiteName);
   },
 
   afterEach: function (browser) {
-    PublicReportingAPI.finishTestCase(browser.currentTest);
+    ReportingAPI.finishTestCase(browser.currentTest);
 
-    PublicReportingAPI.startAfterTestCase(suiteName);
+    ReportingAPI.startAfterTestCase(suiteName);
     // afterEach related actions
-    PublicReportingAPI.finishAfterTestCase();
+    ReportingAPI.finishAfterTestCase();
   },
 
   after: function (browser, done) {
-    PublicReportingAPI.finishSuite(suiteName);
+    ReportingAPI.finishSuite(suiteName);
     browser.end(() => {
-      PublicReportingAPI.destroy();
+      ReportingAPI.destroy();
       done();
     });
   },
@@ -57,9 +57,9 @@ module.exports = {
       .url('https://google.com')
       .waitForElementPresent('foos', 1000);
 
-    PublicReportingAPI.logInfo('Info log for demo test item', null, browser.currentTest.name);
-    PublicReportingAPI.launchLogDebug('Debug log for launch');
-    PublicReportingAPI.addDescription('Demo test for google.com', browser.currentTest.name);
+    ReportingAPI.logInfo('Info log for demo test item', null, browser.currentTest.name);
+    ReportingAPI.launchLogDebug('Debug log for launch');
+    ReportingAPI.addDescription('Demo test for google.com', browser.currentTest.name);
   },
 
   'part two' : function(browser) {
@@ -76,7 +76,7 @@ module.exports = {
       content: fs.readFileSync(path.resolve(__dirname, '../data', 'cities.json')),
     };
 
-    PublicReportingAPI.launchLogInfo('Log with attachment for launch', attachment);
-    PublicReportingAPI.setStatusWarn(browser.currentTest.name);
+    ReportingAPI.launchLogInfo('Log with attachment for launch', attachment);
+    ReportingAPI.setStatusWarn(browser.currentTest.name);
   }
 };

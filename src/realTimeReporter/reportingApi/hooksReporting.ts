@@ -35,7 +35,7 @@ export interface HooksReportingInterface {
 }
 
 export const hooksReporting: HooksReportingInterface = {
-  startBeforeSuite(parentName: string): void {
+  startBeforeSuite(parentName?: string): void {
     const hookName = 'Before suite';
     const codeRef = getCodeRef(hookName);
 
@@ -49,11 +49,11 @@ export const hooksReporting: HooksReportingInterface = {
     publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
-  finishBeforeSuite(data: FinishTestItemRQ): void {
+  finishBeforeSuite(data: FinishTestItemRQ = {}): void {
     publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before suite', status: STATUSES.PASSED, ...data });
   },
 
-  startAfterSuite(parentName: string): void {
+  startAfterSuite(parentName?: string): void {
     const hookName = 'After suite';
     const codeRef = getCodeRef(hookName);
 
@@ -67,7 +67,7 @@ export const hooksReporting: HooksReportingInterface = {
     publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
-  finishAfterSuite(data: FinishTestItemRQ): void {
+  finishAfterSuite(data: FinishTestItemRQ = {}): void {
     publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After suite', status: STATUSES.PASSED, ...data });
   },
 
@@ -85,7 +85,7 @@ export const hooksReporting: HooksReportingInterface = {
     publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
-  finishBeforeTestCase(data: FinishTestItemRQ): void {
+  finishBeforeTestCase(data: FinishTestItemRQ = {}): void {
     publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'Before test', status: STATUSES.PASSED, ...data });
   },
 
@@ -103,7 +103,7 @@ export const hooksReporting: HooksReportingInterface = {
     publishEvent(EVENTS.START_TEST_ITEM, itemObj);
   },
 
-  finishAfterTestCase(data: FinishTestItemRQ): void {
+  finishAfterTestCase(data: FinishTestItemRQ = {}): void {
     publishEvent(EVENTS.FINISH_TEST_ITEM, { name: 'After test', status: STATUSES.PASSED, ...data });
   },
 };
