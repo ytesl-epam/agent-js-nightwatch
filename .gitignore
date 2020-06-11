@@ -1,6 +1,22 @@
-node_modules/
-examples/reports
-examples/rp.json
+# ide
 .idea/
-*.log
+
+# dependencies
+node_modules/
+
+# reports
+reports/
+tests_output/
 screenshots/
+
+# logs
+*.log
+
+# private
+rp.json
+
+# compiled
+/build
+/coverage
+
+.npmrc

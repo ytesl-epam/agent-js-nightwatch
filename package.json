@@ -1,43 +1,57 @@
 {
-  "name": "agent-js-nightwatch",
+  "name": "@reportportal/agent-js-nightwatch",
   "version": "0.2.0",
   "description": "Agent for integration Nightwatch with ReportPortal.",
-  "main": "./src/index.js",
+  "main": "build/index.js",
   "license": "Apache-2.0",
+  "author": "ReportPortal.io",
   "repository": {
     "type": "git",
     "url": "https://github.com/reportportal/agent-js-nightwatch.git"
   },
   "scripts": {
-    "lint": "eslint \"./**/*.js\"",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf ./build",
+    "lint": "echo 'lint'",
     "format": "npm run lint -- --fix",
-    "example:chai": "cd examples && npm run chai",
-    "example:chromeDriver": "cd examples && npm run chromeDriver"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "lodash": "^4.17.10",
     "moment": "^2.22.1",
-    "reportportal-client": "^5.5.0"
+    "node-ipc": "9.1.1",
+    "@reportportal/client-javascript": "^5.0.0"
   },
   "devDependencies": {
-    "chromedriver": "^79.0.0",
-    "nightwatch": "0.9.21",
-    "chai": "^4.1.2",
+    "@types/jest": "^25.2.1",
+    "@types/node-ipc": "9.1.2",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-airbnb-typescript": "^7.0.0",
     "eslint-config-prettier": "^6.10.0",
-    "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.20.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-prettier": "^3.1.2",
-    "eslint-plugin-standard": "^3.0.1",
-    "eslint-plugin-promise": "^4.2.1",
-    "prettier": "^1.19.1"
+    "jest": "^25.3.0",
+    "prettier": "^1.19.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^25.3.1",
+    "typescript": "^3.8.3"
   },
   "directories": {
     "src": "./src"
   },
   "engines": {
     "node": ">= 8.0.x"
-  }
+  },
+  "keywords": [
+    "epam",
+    "reports",
+    "portal",
+    "nightwatch",
+    "reporters",
+    "reportportal"
+  ]
 }
