@@ -1,6 +1,6 @@
 {
   "name": "@reportportal/agent-js-nightwatch",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Agent for integration Nightwatch with ReportPortal.",
   "main": "build/index.js",
   "license": "Apache-2.0",
