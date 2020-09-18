@@ -49,19 +49,19 @@ describe('constructor', function() {
     expect(reporter.storage).toBeInstanceOf(Storage);
   });
 
-  test('should override default options', function() {
+  test('should correctly set launchParams property', function() {
     const config = getDefaultMockConfig();
     config.rerun = true;
     config.rerunOf = 'launchUUID';
     const reporter = new RealTimeReporter(config);
 
     // @ts-ignore access to the class private property
-    expect(reporter.config).toBeDefined();
+    expect(reporter.launchParams).toBeDefined();
 
     // @ts-ignore access to the class private property
-    expect(reporter.config.rerunOf).toEqual('launchUUID');
+    expect(reporter.launchParams.rerunOf).toEqual('launchUUID');
 
     // @ts-ignore access to the class private property
-    expect(reporter.config.rerun).toEqual(true);
+    expect(reporter.launchParams.rerun).toEqual(true);
   });
 });
