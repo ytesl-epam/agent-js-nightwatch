@@ -1,6 +1,7 @@
 ### Fixed
 - Calculating test item status based on first assertion
 - Launch options not applied from config file
+- Typos in documentation
 
 ## [5.0.1] - 2020-06-12
 ### Changed
