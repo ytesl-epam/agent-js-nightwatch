@@ -31,6 +31,8 @@ Create rp.json file with reportportal configuration:
     "description": "Your launch description",
     "rerun": true,
     "rerunOf": "launchUuid of already existed launch",
+    "mode": "DEFAULT",
+    "debug": false,
     "parallelRun": true
 }
 ```
@@ -43,6 +45,8 @@ Create rp.json file with reportportal configuration:
 | project               | The name of the project in which the launches will be created.                                                    |
 | rerun                 | *Default: false.* Enable [rerun](https://github.com/reportportal/documentation/blob/master/src/md/src/DevGuides/rerun.md)|
 | rerunOf               | UUID of launch you want to rerun. If not specified, report portal will update the latest launch with the same name|
+| mode                  | Launch mode. Allowable values *DEFAULT* (by default) or *DEBUG*.|
+| debug                 | This flag allows seeing the logs of the client-javascript. Useful for debugging.|
 | parallelRun           | *Default: false.* Indicates if tests running in parallel (uses for post-factum-reporter)|
 
 ## Reporting
@@ -279,7 +283,7 @@ Example:
 ```javascript
 describe('Suite name', function() {
   after((browser, done) => {
-    ReportingAPI.finishSuite(suiteName);
+    ReportingAPI.finishSuite('Suite name');
     
     ReportingAPI.startAfterSuite();
     // afterSuite related actions
@@ -302,11 +306,11 @@ Example:
 ```javascript
 describe('Suite name', function() {
   beforeEach((browser) => {
-    ReportingAPI.startBeforeTestCase(suiteName);
+    ReportingAPI.startBeforeTestCase('Suite name');
     // beforeEach related actions
     ReportingAPI.finishBeforeTestCase();
       
-    ReportingAPI.startTestCase(browser.currentTest, suiteName);
+    ReportingAPI.startTestCase(browser.currentTest, 'Suite name');
   });
 });
 ```
@@ -323,7 +327,7 @@ describe('Suite name', function() {
   afterEach((browser) => {
     ReportingAPI.finishTestCase(browser.currentTest);
     
-    ReportingAPI.startAfterTestCase(suiteName);
+    ReportingAPI.startAfterTestCase('Suite name');
     // afterEach related actions
     ReportingAPI.finishAfterTestCase();
   });
@@ -424,7 +428,7 @@ describe('Suite name', function() {
 
 ###### launchLog
 Send logs to report portal for the current launch. Should be called inside of the any test.<br/>
-`ReportingAPI.log(level: LOG_LEVELS, message: string, file?: Attachment);`<br/>
+`ReportingAPI.launchLog(level: LOG_LEVELS, message: string, file?: Attachment);`<br/>
 **required**: `level`, `message`<br/>
 where `level` can be one of the following: *TRACE*, *DEBUG*, *WARN*, *INFO*, *ERROR*, *FATAL*<br/>
 Example:
@@ -514,13 +518,13 @@ Do not forget to specify custom commands path in your `nightwatch.conf.js` file:
 ```javascript
 module.exports = {
    // ...your config,
-   custom_commands_path: path.resolve('@reportportal/agent-js-nightwatch/commands'),
+   custom_commands_path: ['./node_modules/@reportportal/agent-js-nightwatch/build/commands'],
 }
 ```
 
 ##### rpLog
 Send log with corresponding level to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
-`ReportingAPI.setStatus(message: string, level: string, itemName?: string);`<br/>
+`browser.rpLog(message: string, level: string, itemName?: string);`<br/>
 **required**: `message, level = 'INFO'`<br/>
 `itemName` **required** only for parallel run<br/>
 where `level` can be one of the following: *TRACE*, *DEBUG*, *WARN*, *INFO*, *ERROR*, *FATAL*<br/>
@@ -538,7 +542,7 @@ describe('Suite name', function() {
 
 ##### rpSaveScreenshot
 Send log with screenshot attachment with provided name to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
-`ReportingAPI.rpSaveScreenshot(fileName: string, itemName?: string, callback?: function);`<br/>
+`browser.rpSaveScreenshot(fileName: string, itemName?: string, callback?: function);`<br/>
 **required**: `fileName`<br/>
 `itemName` **required** only for parallel run<br/>
 Example:
@@ -555,7 +559,7 @@ describe('Suite name', function() {
 
 ##### rpScreenshot
 Send log with screenshot attachment to report portal for the current test or for provided by name. Should be called inside of corresponding test.<br/>
-`ReportingAPI.rpScreenshot(itemName?: string, callback?: function);`<br/>
+`browser.rpScreenshot(itemName?: string, callback?: function);`<br/>
 `itemName` **required** only for parallel run<br/>
 Example:
 ```javascript
@@ -571,7 +575,7 @@ describe('Suite name', function() {
 
 #### Integration with Sauce Labs
 
-To integrate with Sauce Labs just add attributes: 
+To integrate with Sauce Labs just add attributes for the test case: 
 
 ```javascript
 [{

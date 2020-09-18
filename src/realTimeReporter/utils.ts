@@ -22,14 +22,20 @@ import { Attachment, StartLaunchRQ, Attribute } from '../models';
 export const setDefaultFileType = (file: Attachment): Attachment =>
   file ? { type: DEFAULT_FILE_TYPE, ...file } : undefined;
 
-export const getStartLaunchObj = (launchObj: StartLaunchRQ): StartLaunchRQ => {
+export const getStartLaunchObj = (
+  launchObj: StartLaunchRQ,
+  config: StartLaunchRQ = {},
+): StartLaunchRQ => {
   const systemAttributes: Array<Attribute> = getSystemAttributes();
+  const attributes = (launchObj.attributes || config.attributes || []).concat(systemAttributes);
 
   return {
+    description: config.description,
+    rerun: config.rerun,
+    rerunOf: config.rerunOf,
+    mode: config.mode,
     ...launchObj,
-    attributes: launchObj.attributes
-      ? launchObj.attributes.concat(systemAttributes)
-      : systemAttributes,
+    attributes,
   };
 };
 
@@ -44,7 +50,8 @@ export const calculateTestItemStatus = (
     status = STATUSES.SKIPPED;
   } else if (currentTestItemResults.failed !== 0) {
     status = STATUSES.FAILED;
-    const assertionsResult = currentTestItemResults.assertions[0];
+    const assertionsResult =
+      currentTestItemResults.assertions[currentTestItemResults.assertions.length - 1];
 
     assertionsMessage = `${assertionsResult.fullMsg}<br/>${assertionsResult.stackTrace}`;
   } else {

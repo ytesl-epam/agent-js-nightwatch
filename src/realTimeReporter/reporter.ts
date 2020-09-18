@@ -35,14 +35,15 @@ export default class Reporter {
   private client: RPClient;
   private launchId: string;
   private storage: Storage;
-  private config: ReportPortalConfig;
+  private launchParams: StartLaunchRQ;
 
   constructor(config: ReportPortalConfig) {
     this.initReporter();
+    const { attributes = [], description, rerun, rerunOf, mode, ...clientConfig } = config;
     const agentInfo = getAgentInfo();
 
-    this.config = config;
-    this.client = new RPClient(config, agentInfo);
+    this.launchParams = { attributes, description, rerun, rerunOf, mode };
+    this.client = new RPClient(clientConfig, agentInfo);
     this.storage = new Storage();
   }
 
@@ -109,7 +110,7 @@ export default class Reporter {
   }
 
   public startLaunch(launchObj: StartLaunchRQ): void {
-    const startLaunchObj: StartLaunchRQ = getStartLaunchObj(launchObj);
+    const startLaunchObj: StartLaunchRQ = getStartLaunchObj(launchObj, this.launchParams);
 
     this.launchId = this.client.startLaunch(startLaunchObj).tempId;
   }
